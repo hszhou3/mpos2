@@ -9,6 +9,7 @@
 \usepackage[letterpaper,hmargin=1in,vmargin=1in]{geometry}
 \usepackage{palatino}
 \usepackage{xspace,xcolor,amsmath,mathtools,amssymb,amsfonts,amsthm}
+\usepackage[svgnames,x11names,table]{xcolor}
 \usepackage{algorithm}
 \usepackage{algpseudocode}
 \usepackage{float} % for [H] float spec
@@ -46,6 +47,9 @@
 \DeclareMathAlphabet{\mathcal}{OMS}{cmsy}{m}{n}
 
 \newcommand{\ignore}[1]{}
+\newcommand{\hnote}[1]{{\color{DarkBlue}{\it [{\bf Hongsheng:} #1]}}}
+\newcommand{\mnote}[1]{{\color{red}{\it [{\bf Marcin:} #1]}}}
+\newcommand{\anote}[1]{{\color{DarkRed}{\it [{\bf Alvaro:} #1]}}}
 
 % Project names
 \newcommand{\Proj}{\ensuremath{\mathsf{Cryptareon}}\xspace}
