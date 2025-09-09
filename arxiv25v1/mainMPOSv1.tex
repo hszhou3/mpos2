@@ -225,7 +225,7 @@ In effect, \Proj combines the advantages of backbone-style longest-chain protoco
 We introduce \Proj, a family of PoS consensus protocols that realize multi-proposer, DAG-based consensus with strong security and performance. Our key contributions include:
 
 \begin{itemize}
-\item {\bf \ProjIdeal (Idealized Protocol):} We define \ProjIdeal, an idealized version that abstracts away network delays, bounded references, and transaction dependencies. In this model, the network is synchronous, block references can span the entire DAG, and eligibility is public-coin. \ProjIdeal isolates the core consensus logic for analysis of safety and liveness. 
+\item {\bf \ProjIdeal (Idealized Protocol):} We define \ProjIdeal, an idealized version that abstracts away network delays, bounded references, and transaction dependencies. In this model, the network is synchronous, block references can span the entire DAG, and eligibility is \mnote{'a' missing?} public-coin. \ProjIdeal isolates the core consensus logic for analysis of safety and liveness. 
 \item {\bf \ProjBase (Practical Protocol):} We present \ProjBase, a practical protocol that incorporates realistic constraints. Validators use a verifiable random function (VRF) for eligibility, transactions follow UTXO semantics, and each block's short references are restricted to a sliding window of recent slots. %We also include a slashing rule to discourage double-signing. 
 \ProjBase's fork-choice uses a CCA-anchored, window-filtered weight metric.
 \item {\bf Formal Security Analysis:} We formulate DAG-based analogues of the backbone properties (common prefix, chain growth, chain quality) suitable for multi-proposer DAGs. In particular, we define properties such as DAG growth, DAG quality, DAG common past. % and tip boundedness. 
@@ -255,6 +255,7 @@ b = \langle \id(b),\slot(b),\val(b)=v,\txs(b),\refs(b),\longref(b),y(b),\pi(b),\
 \end{equation*}
 where:
 \begin{itemize}
+  \item \mnote{$\id(b)$ is its unique identifier (a hash),}
   \item $\slot(b)=s$ is its slot and $\val(b)=v$ is the creator,
   \item $\txs(b)$ is a set of transactions (e.g., UTXOs) chosen from the mempool,
   \item $\refs(b)$ is a set of hashes of parent blocks, all within the recent window $[s-w+1,s]$ (“short references”),
@@ -264,7 +265,7 @@ where:
 \end{itemize}
 The validator must ensure $\txs(b)$ is conflict-free (no double-spends) relative to the ledger state, and $\refs(b)\cup\{\longref(b)\}$ is an antichain in the DAG, to preserve consistency. Honest blocks are immediately gossiped to all nodes. The union of all blocks and reference edges forms a directed acyclic graph (DAG) $G$. We write $u\leadsto v$ if there is a directed path from block $u$ to $v$ in $G$. For a block $b$, let $\Anc(b)=\{a: a\leadsto b\}$ and $\Desc(b)=\{d: b\leadsto d\}$, with $\Anc^*(b)=\Anc(b)\cup\{b\}$, $\Desc^*(b)=\Desc(b)\cup\{b\}$. Two blocks $u$ and $v$ are {\em incomparable} (denoted $u\parallel v$) if neither $u\leadsto v$ nor $v\leadsto u$.
 
-\paragraph{The Execution of Protocol.} The execution of the protocol is an interactive process: in each slot $s$, each honest player collects all messages (with adversarial delay $\le\Delta$), checks eligibility via VRF, possibly creates a block, and broadcasts it. The adversary may inject blocks for corrupted players and deliver or withhold messages. We denote by $\exec_{\Pi,\cA,\cZ}$ the complete execution transcript. Let $\chainset^s$ be the set of all chains (paths from genesis) visible to honest parties at slot $s$, and $\chain_i^s$ be the chain of party $i$ at slot $s$.
+\paragraph{The Execution of Protocol.} The execution of the protocol is an interactive process: in each slot $s$, each honest player collects all messages (with adversarial delay $\le\Delta$), checks eligibility via VRF, possibly creates a block, and broadcasts it. The adversary may inject blocks for corrupted players and deliver or withhold messages. We denote by $\exec_{\Pi,\cA,\cZ}$ the complete execution transcript. Let $\chainset^s$ be the set of all chains (paths from genesis) visible to honest parties at slot $s$, and $\chain_i^s$ be the chain of party $i$ at slot $s$. \mnote{Nit: the last two sentences introduce notations that are not used later. Can we use them in the next subsection?}
 
 \subsection{Consensus Security Properties}
 \label{sec:DG-DQ-DCP}
@@ -310,7 +311,7 @@ blue = frontier region; gray = common past; red = broadcast transaction event or
 \subsubsection{DAG Growth (DG)}
 \label{sec:DG}
 
-In any window of $\ell$ slots after GST, honest work makes \emph{linear progress along some honest chain} in the DAG: at least $\tau_D\cdot \ell$ honest blocks created in that window end up on the past of an honest party’s fork-choice tip (i.e., on its preferred branch).
+In any window of $\ell$ slots after GST, honest work makes \emph{linear progress along some honest chain} in the DAG: at least $\tau_D\cdot \ell$ honest blocks created in that window end up on the past of an honest party’s fork-choice tip (i.e., on its preferred branch). \mnote{I'm still not certain if this the right definition. My understanding of a DAG based ledger is that it assumes a certain level of parallelism, that is, a node can build on top of many tips. Therefore, I don't think we can assume \emph{linear progress along some honest chain} as the \emph{some honest chain} assume linearity. However, We might need to define "linearization" of the DAG structure, which we could use to define a global \emph{order} of blocks that are included in the DAG structure. Then, we can use a linearized DAG structure to define the \emph{linear progress of some honest chain}. What do you think?}
 
 \begin{figure}[htp!]
 \centering
@@ -320,8 +321,8 @@ In any window of $\ell$ slots after GST, honest work makes \emph{linear progress
 
   % Interval [s, s+ell]
   \draw[very thick,|-|] (40,0) -- (80,0);
-  \node[below] at (40,0) {\scriptsize $s$};
-  \node[below] at (80,0) {\scriptsize $s+\ell$};
+  \node[below] at (40,-0.1) {\scriptsize $s$};
+  \node[below] at (80,-0.1) {\scriptsize $s+\ell$};
   \node[below] at (60,-0.1) {\scriptsize length $\ell$};
 
   % Honest blocks accumulating
@@ -333,7 +334,7 @@ In any window of $\ell$ slots after GST, honest work makes \emph{linear progress
   % Arrow up
   \draw[->] (60,0.6) -- (60,1.3);
   \node[above] at (60,1.3) {\scriptsize DG: $\ge \tau_D\ell$ honest on a preferred branch (w.h.p.)};
-\end{tikzpicture}
+\end{tikzpicture}\mnote{Moved the $s$ and $s+\ell$ a bit down.}
 \caption{\textbf{DAG Growth (DG).}
 \small
 Over any $\ell$-slot interval after GST, with probability $1-\negl(\lambda)$ at least $\tau_D\ell$ honest blocks become ancestors of \emph{an honest party’s fork-choice tip} (i.e., lie on some honest preferred branch). 
@@ -399,12 +400,12 @@ We say $\mathrm{DQ}[\mu_D,\ell]$ holds if
 
   % Labels s and s+ell
   \draw[very thick,|-|] (40,0) -- (80,0);
-  \node[below] at (40,0) {\scriptsize $s$};
-  \node[below] at (80,0) {\scriptsize $s+\ell$};
+  \node[below] at (40,-0.1) {\scriptsize $s$};
+  \node[below] at (80,-0.1) {\scriptsize $s+\ell$};
 
   % Callout
   \node[align=center] at (60,0.9) {\scriptsize DQ: fraction of honest among frontier entrants $\ge \mu_D$ w.h.p.};
-\end{tikzpicture}
+\end{tikzpicture}\mnote{Moved the $s$ and $s+\ell$ a bit down.}
 \caption{\textbf{DAG Quality (DQ).} 
 \small 
 In any $\ell$-slot window after GST, the fraction of \emph{honest blocks} among those entering the advancing frontier is at least $\mu_D$ with probability $1-\negl(\lambda)$. 
@@ -427,7 +428,7 @@ For any two honest views of the DAG at times $t_1\le t_2$, if we remove the last
 Fix $k_D \in \mathbb{N}$. For an honest party $P$ at slot $t$, let $V_t^P$ denote
 its view of the DAG at the end of $t$, and define
 $\mathsf{Trim}(V_t^P,k_D)$ as $V_t^P$ with the last $k_D$ layers (by slots)
-beneath its fork-choice tip removed.
+beneath its fork-choice tip removed. \mnote{For example, couldn't we instead of $V_t^P$ use $\chain_i^s$?}
 
 We say $\mathrm{DCP}[k_D]$ holds if for all honest parties $P,Q$ and all slots
 $t_1 \le t_2$ after $\mathrm{GST}$,
@@ -542,14 +543,14 @@ The green region shows the $k$-deep finalized prefix at $t_1$, which remains unc
 \begin{definition}[Persistence (Safety)]
 Fix $k \in \mathbb{N}$. For an honest party $P$ and slot $t$, let $L_t^P$ denote
 the ledger (totally ordered list of transactions) induced by applying the fork-choice
-rule to $V_t^P$. We say $\mathrm{Persistence}[k]$ holds if for all pairs of honest
+rule to $V_t^P$.\mnote{Same here, couldn't we instead of $V_t^P$ use $\chain_i^s$?} We say $\mathrm{Persistence}[k]$ holds if for all pairs of honest
 parties $P,Q$ and all slots $t_1 \le t_2$ after $\mathrm{GST}$,
 \[
 \Pr\!\Big[\, L_{t_1}^P[1..n-k] \;=\; L_{t_2}^Q[1..n-k] \,\Big] \;\ge\; 1-\negl(\lambda),
 \]
 where $n=|L_{t_1}^P|$. That is, all but the last $k$ transactions in $P$'s ledger
 at time $t_1$ are immutable and appear in $Q$'s ledger at time $t_2$.
-\end{definition}
+\end{definition} \mnote{Nit: This definition is using transactions for the $k$ parameter, however, it looks to me that it should also work if we use blocks instead. Do we need to use transactions in this context as the number of transactions can be a function of the number of blocks? IMHO, I think that it would be more natural to express the persistence as number of blocks rather than the number of transactions.}
 
 \begin{remark}[On DAG Growth and Persistence]
 The proof of persistence later in Sections~3.4.2 and~4.3.2 relies on DG 
@@ -604,7 +605,7 @@ Red marks the transaction broadcast event at slot $s$ and the inclusion window $
 \begin{definition}[Liveness]
 Fix $\ell_{\mathrm{live}} \in \mathbb{N}$. For any valid transaction $\tx$ that is
 broadcast by an honest party $P$ in every slot after $\mathrm{GST}$, let
-$E_t^Q(\tx)$ denote the event that honest party $Q$'s ledger $L_t^Q$ at the end of slot $t$
+$E_t^Q(\tx)$ denote the event that honest party $Q$'s ledger $L_t^Q$ \mnote{Similarly here, couldn't we instead of $L_t^Q$ use $\chain_i^s$?} at the end of slot $t$
 contains $\tx$. We say $\mathrm{Liveness}[\ell_{\mathrm{live}}]$ holds if for all honest parties $P,Q$
 and for all slots $s \ge \mathrm{GST}$,
 \[
@@ -619,7 +620,7 @@ except with negligible probability.
 Liveness requires that valid transactions eventually appear in all honest ledgers. 
 The revised DG property, formulated with respect to preferred branches, 
 ensures that honest block production makes linear progress in those branches. 
-Coupled with TB (to prevent tips from fragmenting indefinitely) 
+Coupled with TB (to prevent tips from fragmenting indefinitely) \mnote{TB is introduced in the next section so maybe "Coupled with tip boundedness (defined below, to prevent tips from fragmenting indefinitely)..."}
 and DQ (to ensure honest dominance), this guarantees that transactions 
 broadcast after GST will be absorbed and confirmed within bounded time. 
 \end{remark}
@@ -686,7 +687,7 @@ If the number of honest tips is unbounded, then:
   included again, liveness of the \emph{transactions} can be salvaged, though at
   the cost of redundancy and wasted effort. We adopt the common assumption of
   no-transaction-redundancy to highlight why TB is critical.
-  \end{remark}
+  \end{remark}\mnote{I'm lacking one thing here. Due to the parallel structure of the DAG we can assume that the same set of transactions will be included in multiple branches. That is, we should expect a natural redundancy of transaction, hence the liveness might be less of a problem in this design. At least until we introduce some mechanisms to reduce the redundancy. For example, we can have verifiable random selection of transactions from mempool, which would naturally reduce the transaction redundancy.}
 \end{itemize}
 
 
