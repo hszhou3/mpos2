@@ -316,13 +316,13 @@ In any window of $\ell$ slots after GST, honest work makes \emph{linear progress
 \centering
 \begin{tikzpicture}[x=0.16cm,y=0.6cm,>=Latex,thick]
   % Axis
-  \draw[-{Latex}] (0,0) -- (105,0) node[below right] {slots};
+  \draw[-{Latex}] (0,0) -- (98,0) node[below right] {slots};
 
   % Interval [s, s+ell]
   \draw[very thick,|-|] (40,0) -- (80,0);
-  \node[below] at (40,0) {\scriptsize $s$};
-  \node[below] at (80,0) {\scriptsize $s+\ell$};
-  \node[below] at (60,-0.1) {\scriptsize length $\ell$};
+  \node[below] at (40,-0.1) {\scriptsize $s$};
+  \node[below] at (80,-0.1) {\scriptsize $s+\ell$};
+  \node[below] at (60,-0.2) {\scriptsize length $\ell$};
 
   % Honest blocks accumulating
   \foreach \x in {42,45,48,51,54,57,60,63,66,69,72,75,78} {
@@ -382,7 +382,7 @@ We say $\mathrm{DQ}[\mu_D,\ell]$ holds if
 \centering
 \begin{tikzpicture}[x=0.16cm,y=0.6cm,>=Latex,thick]
   % Axis
-  \draw[-{Latex}] (0,0) -- (105,0) node[below right] {slots};
+  \draw[-{Latex}] (0,0) -- (98,0) node[below right] {slots};
 
   % Frontier band over an interval
   \fill[blue!8] (40,1.4) rectangle (80,2.6);
@@ -399,8 +399,8 @@ We say $\mathrm{DQ}[\mu_D,\ell]$ holds if
 
   % Labels s and s+ell
   \draw[very thick,|-|] (40,0) -- (80,0);
-  \node[below] at (40,0) {\scriptsize $s$};
-  \node[below] at (80,0) {\scriptsize $s+\ell$};
+  \node[below] at (40,-0.1) {\scriptsize $s$};
+  \node[below] at (80,-0.1) {\scriptsize $s+\ell$};
 
   % Callout
   \node[align=center] at (60,0.9) {\scriptsize DQ: fraction of honest among frontier entrants $\ge \mu_D$ w.h.p.};
@@ -446,7 +446,7 @@ except with negligible probability.
 \centering
 \begin{tikzpicture}[x=0.16cm,y=0.6cm,>=Latex,thick]
   % Axis
-  \draw[-{Latex}] (0,0) -- (105,0) node[below right] {slots};
+  \draw[-{Latex}] (0,0) -- (98,0) node[below right] {slots};
 
   % Common past region (identical after trimming)
   \fill[black!8] (0,1.4) rectangle (55,2.6);
@@ -454,33 +454,33 @@ except with negligible probability.
   \node at (27.5,2.0) {\scriptsize common past (identical)};
 
   % Frontier windows near t1 and t2 (last k_D layers)
-  \fill[blue!8] (55,1.4) rectangle (70,2.6);
-  \draw[blue!60!black] (55,1.4) rectangle (70,2.6);
+  \fill[blue!8] (50,1.4) rectangle (65,2.6);
+  \draw[blue!60!black] (50,1.4) rectangle (65,2.6);
 %  \node[blue!60!black] at (62.5,2.95) {\scriptsize $\mathsf{Frontier}_{t_1}^P$};
-  \node[blue!60!black] at (62.5,3.1) {\scriptsize $\mathsf{Frontier}_{t_1}^P$};
+  \node[blue!60!black] at (57.5,3.1) {\scriptsize $\mathsf{Frontier}_{t_1}^P$};
 
-  \fill[blue!8] (85,1.4) rectangle (100,2.6);
-  \draw[blue!60!black] (85,1.4) rectangle (100,2.6);
+  \fill[blue!8] (80,1.4) rectangle (95,2.6);
+  \draw[blue!60!black] (80,1.4) rectangle (95,2.6);
 %  \node[blue!60!black] at (92.5,2.95) {\scriptsize $\mathsf{Frontier}_{t_2}^Q$};
-  \node[blue!60!black] at (92.5,3.1) {\scriptsize $\mathsf{Frontier}_{t_2}^Q$};
+  \node[blue!60!black] at (87.5,3.1) {\scriptsize $\mathsf{Frontier}_{t_2}^Q$};
 
   % Vertical markers t1, t2
-  \draw[dashed] (70,0.3) -- (70,3.2) node[above] {$t_1$};
-  \draw[dashed] (100,0.3) -- (100,3.2) node[above] {$t_2$};
+  \draw[dashed] (65,0.3) -- (65,3.2) node[above] {$t_1$};
+  \draw[dashed] (95,0.3) -- (95,3.2) node[above] {$t_2$};
 
   % Braces highlighting "trim" operation
-  \draw[decorate,decoration={brace,amplitude=6pt}] (70,2.95) -- (55,2.95)
+  \draw[decorate,decoration={brace,amplitude=6pt}] (65,2.95) -- (50,2.95)
     node[midway,above=7pt] {\scriptsize remove last $k_D$};
-  \draw[decorate,decoration={brace,amplitude=6pt}] (100,2.95) -- (85,2.95)
+  \draw[decorate,decoration={brace,amplitude=6pt}] (95,2.95) -- (80,2.95)
     node[midway,above=7pt] {\scriptsize remove last $k_D$};
 
   % Annotation showing subset relation of trimmed DAGs
-  \node[align=center] (trimEq) at (45,0.55)
+  \node[align=center] (trimEq) at (40,0.55)
     {\scriptsize $\mathsf{Trim}(V_{t_1}^P,k_D)\;\subseteq\;\mathsf{Trim}(V_{t_2}^Q,k_D)$};
 
   % Arrows from braces to annotation
-  \draw[->,blue!60!black] (62.5,2.65) .. controls (62.5,1.6) and (50,1.2) .. (trimEq.north);
-  \draw[->,blue!60!black] (92.5,2.65) .. controls (92.5,1.6) and (60,1.2) .. (trimEq.north);
+  \draw[->,blue!60!black] (57.5,2.65) .. controls (57.5,1.6) and (45,1.2) .. (trimEq.north);
+  \draw[->,blue!60!black] (87.5,2.65) .. controls (87.5,1.6) and (55,1.2) .. (trimEq.north);
 
 \end{tikzpicture}
 \caption{\textbf{DAG Common Past (DCP).} 
@@ -513,11 +513,11 @@ except with probability $\negl(\lambda)$.
 \centering
 \begin{tikzpicture}[x=0.16cm,y=0.6cm,>=Latex,thick]
   % Axis
-  \draw[-{Latex}] (0,0) -- (103,0) node[below right] {slots};
+  \draw[-{Latex}] (0,0) -- (98,0) node[below right] {slots};
 
   % t1 and t2 markers
   \draw[dashed] (70,-2.0) -- (70,3.0) node[above] {$t_1$};
-  \draw[dashed] (100,-2.0) -- (100,3.0) node[above] {$t_2$};
+  \draw[dashed] (90,-2.0) -- (90,3.0) node[above] {$t_2$};
 
   % k-deep prefix at t1
   \fill[green!12] (0,1.4) rectangle (45,2.6);
@@ -575,7 +575,7 @@ except with probability $\negl(\lambda)$.
 \centering
 \begin{tikzpicture}[x=0.16cm,y=0.6cm,>=Latex,thick]
   % Axis
-  \draw[-{Latex}] (0,0) -- (103,0) node[below right] {slots};
+  \draw[-{Latex}] (0,0) -- (98,0) node[below right] {slots};
 
   % Broadcast start s and window [s, s+ell_live]
   \draw[very thick,|-|] (40,-0.8) -- (75,-0.8);
