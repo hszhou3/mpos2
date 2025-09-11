@@ -1,3 +1,47 @@
+%!TEX root = mainMPOSv1.tex
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Section 1: Introduction
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Introduction}
+\label{sec:intro}
+
+The evolution of blockchain consensus protocols has been shaped by an ongoing tension between scalability, security, and decentralization. Traditional chain-based protocols---such as Bitcoin and many proof-of-stake (PoS) variants---rely on a single proposer (leader) and extend a linear sequence of blocks. While this approach simplifies state replication, it inherently limits throughput and robustness. In particular, to ensure the {\em common prefix} property (that honest nodes' chains do not diverge beyond a certain point) and {\em chain quality} (that a sufficient fraction of blocks come from honest parties), chain-based protocols must keep the block production rate low relative to network latency. If blocks are produced too rapidly or if messages are delayed, honest nodes may fail to receive the latest block before creating the next one, leading to forks, orphaned blocks, and weakened security guarantees. This trade-off forces such protocols to suppress throughput, resulting in high confirmation latency and limited transaction capacity.
+
+Moreover, the single-leader design makes chain-based systems vulnerable to network asynchrony and adversarial behavior. Adverse network conditions or message delays can break the common prefix, enabling chain reorganizations and double-spend attacks. Similarly, if a malicious or slow proposer controls a slot, it can censor or delay transactions, undermining liveness and fairness.
+
+\subsection{Efficiency Bottlenecks in Chain-Based Consensus Protocols}
+Chain-based consensus protocols, including Bitcoin~\cite{Bitcoin} and PoS variants like Ouroboros Praos~\cite{EC:DGKR18}, employ sequential block production: in each round or slot, a designated leader proposes a new block to extend the chain. This design simplifies certain proofs of safety, but introduces a fundamental scalability–security trade-off. The throughput must be throttled to ensure blocks propagate fully before the next one, or else forks become likely. If blocks are generated too quickly relative to network delay, honest nodes may see different chains, violating common-prefix, and undermining the security and liveness guarantees. Thus, to maintain safety, these protocols deliberately limit their block rate, resulting in higher latency and lower capacity.
+
+Furthermore, when network conditions deteriorate (large delays or partitions), even these limited-throughput protocols can fail to maintain consistency. Single-proposer systems are particularly fragile: any disruption in message delivery can cause honest nodes to fall out of sync, allowing adversaries to execute chain reorganizations or double-spend attacks. In summary, traditional chain protocols face a bottleneck: increasing throughput or asynchrony directly threatens security, forcing a cautious pace.
+
+\subsection{Multi-Proposer and DAG-Based Consensus}
+To overcome these limitations, a new class of protocols has emerged that embraces {\em multi-proposer} (leaderless) designs and {\em directed acyclic graph} (DAG) data structures. In such protocols, multiple validators can propose blocks concurrently in each slot. Blocks reference each other (rather than a single predecessor), forming a DAG instead of a linear chain. This parallelism allows the system to utilize more of the available network bandwidth: all eligible validators can produce blocks in a slot, increasing throughput and resilience.
+
+Each block typically cites as many recent blocks as possible (within a sliding window of time), creating a {\em maximal antichain}---a set of blocks that are mutually unreachable. These antichains represent independent “votes” on recent history, which all future blocks will reference and merge. Even if network delays cause temporary forks, the DAG structure allows honest work to accumulate in parallel branches and be resolved later.
+
+\paragraph{Consensus via CCA and Stake Weighting:}
+To decide on a single history, DAG-based protocols employ a fork-choice rule that aggregates votes (references) and uses stake weight. \Proj adopts the \emph{closest common ancestor} (CCA) rule to localize branch comparisons: given two conflicting heads, their fork merges at some CCA, and each branch's ``weight'' is measured from that point forward. Each block contributes weight (e.g., 1 or its creator's stake fraction) to the branch it extends. Honest validators always build on their current preferred branch, so over time the branch with more cumulative honest weight will dominate. The CCA rule ensures that an adversarial fork must compete \emph{locally} against the honest branch at each step, preventing deferred ``ambush'' tactics with withheld blocks. Combined with an \emph{anchored, window-limited} weight count (ignoring references older than $w$ slots), this yields rapid convergence: once one branch leads by a margin within the window, it stays ahead.
+
+Importantly, multiple proposers per slot mean many honest blocks can extend different tips in parallel, but they will cite each other in the next round. This behavior resembles a voting committee whose size equals the number of online validators, without an explicit committee formation step. The DAG structure, with antichains of recent tips, naturally implements a form of one-step voting on conflicting histories: each new block implicitly votes for all the tips it references.
+
+In effect, \Proj combines the advantages of backbone-style longest-chain protocols (simplicity and dynamic availability) with committee-based BFT (fast finality under good network conditions), all in a unified DAG framework. The design increases throughput and lowers latency while maintaining strong security guarantees, even under realistic network conditions.
+
+\subsection{Our Contributions}
+We introduce \Proj, a family of PoS consensus protocols that realize multi-proposer, DAG-based consensus with strong security and performance. Our key contributions include:
+
+\begin{itemize}
+\item {\bf \ProjIdeal (Idealized Protocol):} We define \ProjIdeal, an idealized version that abstracts away network delays, bounded references, and transaction dependencies. In this model, the network is synchronous, block references can span the entire DAG, and eligibility is public-coin. \ProjIdeal isolates the core consensus logic for analysis of safety and liveness. 
+\item {\bf \ProjBase (Practical Protocol):} We present \ProjBase, a practical protocol that incorporates realistic constraints. Validators use a verifiable random function (VRF) for eligibility, transactions follow UTXO semantics, and each block's short references are restricted to a sliding window of recent slots. %We also include a slashing rule to discourage double-signing. 
+\ProjBase's fork-choice uses a CCA-anchored, window-filtered weight metric.
+\item {\bf Formal Security Analysis:} We formulate DAG-based analogues of the backbone properties (common prefix, chain growth, chain quality) suitable for multi-proposer DAGs. In particular, we define properties such as DAG growth, DAG quality, DAG common past. % and tip boundedness. 
+Under standard PoS assumptions and partial synchrony, we prove that \ProjBase satisfies persistence (safety) and liveness of the ledger. Our proofs adapt coupling arguments from classical backbone analysis to the DAG setting.
+\item {\bf Performance Evaluation:} We implement \ProjBase and evaluate it under varying adversarial stake and network delays. Our simulations demonstrate that \Proj achieves stable finality and high throughput, outperforming traditional chain-based protocols and earlier DAG-based designs (e.g., PHANTOM/GHOSTDAG, Avalanche~\cite{SnowFamily}, Lachesis). Notably, \Proj maintains consistency even with high adversarial stake and latency.
+\item {\bf Relation to Prior Work:} We position \Proj in the context of existing consensus research. We draw connections to the Bitcoin/Ouroboros backbone framework~\cite{EC:GarKiaLeo15,EC:PasSeeShe17} and DAG-based protocols like PHANTOM~\cite{AFT:SWZ21} and Avalanche~\cite{SnowFamily}. We also compare to BFT protocols (Algorand~\cite{Algorand}, HotStuff~\cite{HotStuff}). Our key insight is that multi-proposer DAGs change the analysis: we combine elements of backbone arguments with new DAG properties. 
+\end{itemize}
+
+
 
 
 
