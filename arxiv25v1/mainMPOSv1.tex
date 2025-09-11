@@ -255,7 +255,7 @@ b = \langle \id(b),\slot(b),\val(b)=v,\txs(b),\refs(b),\longref(b),y(b),\pi(b),\
 \end{equation*}
 where:
 \begin{itemize}
-  \item \mnote{$\id(b)$ is its unique identifier (a hash),}
+  \item \mnote{$\id(b)$ is its unique identifier (a hash),}\hnote{Taken} 
   \item $\slot(b)=s$ is its slot and $\val(b)=v$ is the creator,
   \item $\txs(b)$ is a set of transactions (e.g., UTXOs) chosen from the mempool,
   \item $\refs(b)$ is a set of hashes of parent blocks, all within the recent window $[s-w+1,s]$ (“short references”),
@@ -405,7 +405,7 @@ We say $\mathrm{DQ}[\mu_D,\ell]$ holds if
 
   % Callout
   \node[align=center] at (60,0.9) {\scriptsize DQ: fraction of honest among frontier entrants $\ge \mu_D$ w.h.p.};
-\end{tikzpicture}\mnote{Moved the $s$ and $s+\ell$ a bit down.}
+\end{tikzpicture}\mnote{Moved the $s$ and $s+\ell$ a bit down.}\hnote{Taken}
 \caption{\textbf{DAG Quality (DQ).}
 \small
 In any $\ell$-slot window after GST, the fraction of \emph{honest blocks} among those entering the advancing frontier is at least $\mu_D$ with probability $1-\negl(\lambda)$.
