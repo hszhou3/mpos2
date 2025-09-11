@@ -311,7 +311,7 @@ blue = frontier region; gray = common past; red = broadcast transaction event or
 \subsubsection{DAG Growth (DG)}
 \label{sec:DG}
 
-In any window of $\ell$ slots after GST, honest work makes \emph{linear progress along some honest chain} in the DAG: at least $\tau_D\cdot \ell$ honest blocks created in that window end up on the past of an honest party’s fork-choice tip (i.e., on its preferred branch). \mnote{I'm still not certain if this the right definition. My understanding of a DAG based ledger is that it assumes a certain level of parallelism, that is, a node can build on top of many tips. Therefore, I don't think we can assume \emph{linear progress along some honest chain} as the \emph{some honest chain} assume linearity. However, We might need to define "linearization" of the DAG structure, which we could use to define a global \emph{order} of blocks that are included in the DAG structure. Then, we can use a linearized DAG structure to define the \emph{linear progress of some honest chain}. What do you think?}
+In any window of $\ell$ slots after GST, honest work makes \emph{linear progress along some honest chain} in the DAG: at least $\tau_D\cdot \ell$ honest blocks created in that window end up on the past of an honest party’s fork-choice tip (i.e., on its preferred branch). \mnote{I'm still not certain if this the right definition. My understanding of a DAG based ledger is that it assumes a certain level of parallelism, that is, a node can build on top of many tips. Therefore, I don't think we can assume \emph{linear progress along some honest chain} as the \emph{some honest chain} assume linearity. However, We might need to define "linearization" of the DAG structure, which we could use to define a global \emph{order} of blocks that are included in the DAG structure. Then, we can use a linearized DAG structure to define the \emph{linear progress of some honest chain}. What do you think?}\hnote{Thanks for your comments; your suggestions have been taken (in the main branch)!} 
 
 \begin{figure}[htp!]
 \centering
@@ -334,7 +334,7 @@ In any window of $\ell$ slots after GST, honest work makes \emph{linear progress
   % Arrow up
   \draw[->] (60,0.6) -- (60,1.3);
   \node[above] at (60,1.3) {\scriptsize DG: $\ge \tau_D\ell$ honest on a preferred branch (w.h.p.)};
-\end{tikzpicture}\mnote{Moved the $s$ and $s+\ell$ a bit down.}
+\end{tikzpicture}\mnote{Moved the $s$ and $s+\ell$ a bit down.}\hnote{These editorial comments about the security defintion related figures have been taken in the main branch now. thanks.} 
 \caption{\textbf{DAG Growth (DG).}
 \small
 Over any $\ell$-slot interval after GST, with probability $1-\negl(\lambda)$ at least $\tau_D\ell$ honest blocks become ancestors of \emph{an honest party’s fork-choice tip} (i.e., lie on some honest preferred branch).
