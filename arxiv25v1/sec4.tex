@@ -22,9 +22,9 @@ for the idealized model continue to hold in a realistic environment.
 
 \begin{itemize}
   \item \textbf{Network.} There exists GST after which honest messages are delivered within $\Delta$ slots.
-  \item \textbf{Eligibility.} Each validator $v$ is eligible in slot $s$ iff $(y,\pi)=\VRFSign_{\sk_v}(\domsep\|\chainid\|\netid\|s)$ satisfies $y<p(s,v)$ (Alg.~\ref{alg:block-creation}).
+  \item \textbf{Eligibility.} Each validator $v$ is eligible in slot $s$ iff $(y,\pi)=\VRFSign_{\sk_v}(\domsep\|\chainid\|\netid\|s)$ satisfies $y<p(s,v)$ (Alg.~\ref{alg:block-creation}). \mnote{I believe that we have simplified this.}
   \item \textbf{References.} In slot $s$, short references must lie in the \emph{window} $W(s;w)=[s{-}w{+}1,s]$; at most one \emph{long-ref} $\ell$ to any older block is allowed and carries zero weight.
-  \item \textbf{Fork-choice.} We score tips by summing (optionally stake-weighted) short-reference counts of \emph{descendants} within the last $w$ slots, anchored at a fixed block $a$ (Alg.~\ref{alg:fork-choice}).
+  \item \textbf{Fork-choice.} We score tips by summing (optionally stake-weighted) short-reference counts of \emph{descendants} within the last $w$ slots, anchored at a fixed block $a$ (Alg.~\ref{alg:fork-choice}). \mnote{Note: A stake-weighted fork-choice rule is good to have for generalization of the protocol. I will just note that in our "privacy" focused design we are not disclosing the value of the stake of the validator, we only bind the chances of winning to the stake. Therefore, counting the weight as the number of short-reference counts is optimal as the frequency of proposing a block is a function of stake, so the block/reference count is also a function of stake.}
   \item \textbf{Conflicts.} Two incomparable blocks implying conflicting ledger states are resolved by comparing window-filtered branch weights \emph{from their} $c=\CCA(i,j)$ (Alg.~\ref{alg:cca-resolve}).
 \end{itemize}
 
@@ -34,7 +34,7 @@ for the idealized model continue to hold in a realistic environment.
 w \;\ge\; \Delta \;+\; \omega(\log\lambda) \qquad\text{and}\qquad 
 H>\tfrac{1}{2}+\varepsilon
 \end{equation}
-for some constant $\varepsilon>0$. The slack $\omega(\log\lambda)$ is used for concentration bounds.
+for some constant $\varepsilon>0$. The slack $\omega(\log\lambda)$ is used for concentration bounds. \mnote{Might be good remind what the $H$, and $\Delta$ mean. I had to look for $H$ ;)}
 
 \subsubsection{Protocol Explanation (Honest Player View)}
 \label{subsec:base-walkthrough}
@@ -43,7 +43,7 @@ We describe the per-slot state machine of an \emph{honest} node $P$; we explicit
 %(Depending on global numbering these appear as Algorithms~6–9.)
 
 \paragraph{Start of slot $s$.}
-$P$ maintains a local DAG $G_s=(V_s,E_s)$ and a ledger state view induced by its \emph{preferred tip}. It also caches reachability summaries and a per-validator latest-block map.
+$P$ maintains a local DAG $G_s=(V_s,E_s)$ and a ledger state view induced by its \emph{preferred tip} \mnote{preferred set of tips?}. It also caches reachability summaries and a per-validator latest-block map.
 
 \begin{enumerate}
   \item \textbf{Eligibility \& transaction sampling.}
@@ -61,17 +61,17 @@ $P$ maintains a local DAG $G_s=(V_s,E_s)$ and a ledger state view induced by its
   signs it, inserts it locally, and gossips.
 
   \item \textbf{Block reception (Alg.~\ref{alg:block-reception}, continuous during slot).}
-  For each received block $b'$: verify VRF proof and signature; fetch missing parents; check (i) window constraint for short refs, (ii) at most one long-ref, (iii) no cycles, (iv) $R_w$ is an antichain in $G_{s,w}$, and (v) no UTXO conflicts vs.\ ancestors. Reject if any check fails; otherwise integrate and update summaries and $\Tips(G)$.
+  For each received block $b'$: verify VRF proof and signature; fetch missing parents; check (i) window constraint for short refs, (ii) at most one long-ref, (iii) \mnote{assert?} no cycles, (iv) \mnote{validate?} $R_w$ is an antichain in $G_{s,w}$, and (v) \mnote{confirm?} no UTXO conflicts vs.\ ancestors \mnote{exist?}. Reject if any check fails; otherwise integrate and update summaries and $\Tips(G)$.
 
   \item \textbf{Anchored fork-choice (Alg.~\ref{alg:fork-choice}, end of slot).}
   With anchor $a$ (genesis or last finalized checkpoint), compute for each tip $T\in\Tips(G)$ the window-filtered score
   \[
   W(T)=\sum_{\substack{d\in\Desc^*(T)\\a\leadsto d}}\mathrm{contrib}(d)\cdot \wref(d;w),
   \]
-  set preferred tip $\hat T_s\in\arg\max W(T)$ (tie-break by $(\slot,\id)$), and expose the induced ledger order.
+  set preferred tip $\hat T_s\in\arg\max W(T)$ (tie-break by $(\slot,\id)$), and expose the induced ledger order. \mnote{Similar to \ProjIdeal comments instead of a single preferred tip we should use a set of preferred tips for references, also I think that the tie breaking mechanism should be based on something that is not controlled by the node - like VRF output. However, in practice I think that by using the VRF we can only limit the impact of adversarial actions on the conflict resolution. The adversary can have multiple identities that he can use to generate multiple VRF outputs per-slot. At the same time, I think, due to the construction of the VRF we use, there is a slight disadvantage for the node to divide the stake. So it might be more complex to be exploited by the adversary.}
 
   \item \textbf{Conflict resolution via CCA (Alg.~\ref{alg:cca-resolve}, on demand).}
-  When two incomparable heads $i,j$ imply conflicting states, $P$ computes $c=\CCA(i,j)$ and compares $\BranchW(i;c,w)$ vs.\ $\BranchW(j;c,w)$. The winner determines which subtree remains eligible for inclusion in the preferred branch. This decision is \emph{consistent} with the anchored fork-choice (the preferred tip must lie on the heavier branch past the CCA).
+  When two incomparable heads $i,j$ imply conflicting states, $P$ computes $c=\CCA(i,j)$ and compares $\BranchW(i;c,w)$ vs.\ $\BranchW(j;c,w)$. The winner determines which subtree remains eligible for inclusion in the preferred branch. This decision is \emph{consistent} with the anchored fork-choice (the preferred tip must lie on the heavier branch past the CCA).\mnote{"the preferred set of tips must lie on the heaviest branches past the CCA"?}
 \end{enumerate}
 
 %\newpage
@@ -82,7 +82,7 @@ $P$ maintains a local DAG $G_s=(V_s,E_s)$ and a ledger state view induced by its
 \label{subsec:notation}
 We reuse the notation from Section~\ref{sec:ideal}. In addition:
 \paragraph{Ledger Validity and Conflicts.}
-Let $S$ be the current ledger state. A multiset of transactions $T\subseteq \Tx$ is valid if $\Valid(S,T)=\textsf{true}$. Two transactions $x,y$ conflict (denoted $\Conflicts(x,y)$) if they cannot both appear in any valid ledger state (e.g., they double-spend a UTXO). For a set of blocks $H\subseteq V$, let $\txs(H)=\bigcup_{h\in H}\txs(h)$ be the union of their transactions. We say a set $T$ conflicts with $H$, written $\Conflicts(T,H)$, if any transaction in $T$ conflicts with any in $\txs(H)$, or any two transactions in $T$ conflict with each other.
+Let $S$ be the current ledger state. A multiset of transactions $T\subseteq \Tx$ is valid if $\Valid(S,T)=\textsf{true}$. Two transactions $x,y$ conflict (denoted $\Conflicts(x,y)$) if they cannot both appear in any valid ledger state (e.g., they double-spend a UTXO). For a set of blocks $H\subseteq V$, \mnote{Haven't we just used the $H$ as the set of honest nodes above? This might be confusing.} let $\txs(H)=\bigcup_{h\in H}\txs(h)$ be the union of their transactions. We say a set $T$ conflicts with $H$, written $\Conflicts(T,H)$, if any transaction in $T$ conflicts with any in $\txs(H)$, or any two transactions in $T$ conflict with each other.
 
 \paragraph{Reference Window and Long-Refs.}
 Fix a window parameter $w\in\mathbb{N}$. In slot $s$, the reference window is $W(s;w)=\{t: s-w+1\le t \le s\}$. Let $V_{s,w}=\{v\in V: \slot(v)\in W(s;w)\}$ and $E_{s,w}=\{(u\to v)\in E: u,v\in V_{s,w}\}$. Write $G_{s,w}=(V_{s,w},E_{s,w})$. For any block $b$ at slot $s$, partition its references as short vs. long:
@@ -90,14 +90,14 @@ Fix a window parameter $w\in\mathbb{N}$. In slot $s$, the reference window is $W
 \shortrefs(b)=\{r\in\refs(b): s-\slot(r)<w\}, \qquad
 \longrefs(b)=\refs(b)\setminus\shortrefs(b).
 \end{equation*}
-We require $|\longrefs(b)|\le1$. If there is a long-ref, call it $\longref(b)\in\Id$, and it contributes zero weight in fork-choice.
+We require $|\longrefs(b)|\le1$. If there is a long-ref, call it $\longref(b)\in\Id$, \mnote{To the reader it might not be clear that $\longrefs(b)$ is related to $\longref(b)$ as "longrefs(b)" renders "refsout(b)" in the text.} and it contributes zero weight in fork-choice. \mnote{Similar as for \ProjIdeal, we could consider shifting that window slightly so that adversarial nodes cannot refer to blocks that have no chance to propagate through the network. But the problem with that approach is that we have not simulated it. So I think we could leave it for the "future" or mark it as potential "optimization".}
 
 \paragraph{VRF-Based Eligibility (PoS).}
 Let $(\VRFSign,\VRFVerify)$ be a secure VRF. In slot $s$, validator $v$ computes $(y,\pi)=\VRFSign(\sk(v);\ \domsep\|\Encode(\chainid)\|\Encode(\netid)\|\Encode(s))$ with $y\in[0,1)$. Let $p(s,v)$ be the per-slot success probability (typically $p(s,v)=\phi\cdot\stakefrac{v}$ for a global parameter $\phi$). Then define
 \begin{equation*}
 \mathsf{ok} = (y < p(s,v)),\quad \Eligibility(v,s)\text{ outputs }(\mathsf{ok},\pi,y).
-\end{equation*}
-On seeing a block $b$ with $(y(b),\pi(b))$, nodes verify the VRF proof $$\VRFVerify(\pk(v);\allowbreak \domsep\|\Encode(\chainid)\|\Encode(\netid)\|\Encode(\slot(b)), y(b), \pi(b))$$ and a digital signature $\VerifySig(\pk(v); b, \sigma(b))$. If either check fails, the block is ignored.
+\end{equation*} \mnote{We could simplify this similarly to the \ProjIdeal. However, here we could preserve the $stakefrac{v}$ part as this is what we are going to simulate.}
+On seeing a block $b$ with $(y(b),\pi(b))$, nodes verify the VRF proof $$\VRFVerify(\pk(v);\allowbreak \domsep\|\Encode(\chainid)\|\Encode(\netid)\|\Encode(\slot(b)), y(b), \pi(b))$$ and a digital signature $\VerifySig(\pk(v); b, \sigma(b))$. If either check fails, the block is ignored. \mnote{Note: If the first check fails and the second holds then this could be used for verifiable slashing of the sender of an ineligible proposal. WDYT?}
 
 \subsubsection{Block Creation (\ProjBase)}
 \begin{algorithm}[H]
@@ -109,7 +109,7 @@ On seeing a block $b$ with $(y(b),\pi(b))$, nodes verify the VRF proof $$\VRFVer
 \State $(\mathsf{ok}, \pi, y) \gets \Eligibility(v,s)$
 \If{not $\mathsf{ok}$} \Return $\bot$ \EndIf
 \State $T \gets \SampleMempool(M, 1/N_{\MCP};\ \rho = \Hash(y\|s))$
-\Comment{Sample transactions (e.g., subsample UTXO pool with entropy $\rho$)}
+\Comment{Sample transactions (e.g., subsample UTXO pool with entropy $\rho$)}\mnote{This looks a bit too complex for the base model IMHO. I think we could simply state that a node is selecting up to a fixed number of transactions from the mempool. I've made a comment in one of the above sections about this random sampling being an transaction-redundancy decreasing optimization, which we might save for later.}
 \State $R \gets \GreedyAntichain(G_{s,w})$
 \Comment{Select maximal antichain of recent blocks}
 \State $\ell \gets \OptionalLongRef(G, s, w, R, T)$
@@ -123,7 +123,7 @@ R \cup \{\ell\} & \text{if }\ell\neq\bot,\\
 R & \text{otherwise.}
 \end{cases}$
 %\State $b \gets \langle \id,\,\val=v,\,\slot=s,\,\txs=T,\,\refs,\,y,\,\pi,\,\sigma=\Sign(\sk(v);\id\|\val\|\slot\|\txs\|\refs\|y\|\pi)\rangle$
-\State $b \gets \langle \id,\,\val,\,\slot,\,\txs,\,\refs,\,y,\,\pi,\,\sigma\rangle$ where $\val=v$, $\slot=s$, $\txs=T$, and $\sigma=\Sign(\sk(v);\id\|\val\|\slot\|\txs\|\refs\|y\|\pi)$
+\State $b \gets \langle \id,\,\val,\,\slot,\,\txs,\,\refs,\,y,\,\pi,\,\sigma\rangle$ where $\val=v$, $\slot=s$, $\txs=T$, and $\sigma=\Sign(\sk(v);\id\|\val\|\slot\|\txs\|\refs\|y\|\pi)$ \mnote{Nit: Maybe we could drop the $\val=v$, $\slot=s$, $\txs=T$ part and use $v,s,T$ directly? Also we could define how to derive the $id$. }
 \State $\IntegrateAndGossip(b)$
 \State \Return $b$
 \end{algorithmic}
@@ -140,7 +140,7 @@ R & \text{otherwise.}
 \Ensure $b$ is accepted into $G$ or deferred/rejected
 \If{$b\in V$} \Return \EndIf
 \If{$\exists r\in \refs(b)$ such that $r\notin V$}
-  \State Request missing parent $r$; enqueue $b$; \Return
+  \State Request missing parent $r$; enqueue $b$; \Return \mnote{As in the \ProjIdeal, might be clearer to be explicit here so that we don't need to enqueue $$b$ and can reject it if $r$ is not available in a bounded time.}
 \EndIf
 \State $(\mathsf{ok}',\pi',y') \gets \VRFVerify(\pk(\val(b));\ \domsep\|\Encode(\chainid)\|\Encode(\netid)\|\Encode(\slot(b)), y(b), \pi(b))$
 \If{\textbf{not} $\mathsf{ok}'$ \textbf{or not} $\VerifySig(\pk(\val(b)); b, \sigma(b))$} 
@@ -155,7 +155,7 @@ R & \text{otherwise.}
 \If{$\exists r\in \refs(b)$ such that $r\in \Desc^*(b)$}
   \State \textbf{reject} $b$ \Comment{cycle detected}
 \EndIf
-\If{$\exists r,r'\in \refs(b),\ r\neq r'$ such that $r\nparallel r'$ in $G$}
+\If{$\exists r,r'\in \refs(b),\ r\neq r'$ such that $r\nparallel r'$ in $G$} \mnote{It looks to me that this is the single place we use this $\nparallel$ notation. Might be good to explain it.}
   \State \textbf{reject} $b$ \Comment{$R_w$ not an antichain}
 \EndIf
 \If{$\Conflicts(\txs(b), \Anc^*(\refs(b)))$}
@@ -164,21 +164,21 @@ R & \text{otherwise.}
 \State Insert $b$ and edges $(r \to b)$ for all $r\in\refs(b)$ into $G$
 \State Update $\Tips(G)$, reachability summaries, and latest-block map $L$
 \State $\ForkChoiceUpdate(G)$
-\State $\Broadcast(b)$
+\State $\Broadcast(b)$ \mnote{No need to rebroadcast}
 \end{algorithmic}
 \end{algorithm}
 
 \begin{remark}
 The integration logic assumes one-slot network delays for simplicity. In practice, a node might receive a block with $\slot(b) < s$. The checks still apply; if $s-\slot(b) < w$, the block can be integrated (it arrived late but within the window).
-\end{remark}
+\end{remark} \mnote{Good remark, I think, it can be also justify that one-slot delay might not be enough for honest nodes to see the block for the same or next slot, so only adversary could be able to see them. Which means that we could add a "delay" or shift that window back.}
 
 \subsubsection{Fork Choice and Conflict Resolution (\ProjBase)}
 \begin{algorithm}[H]
 \caption{Anchored Fork Choice (\ProjBase)}
 \label{alg:fork-choice}
 \begin{algorithmic}[1]
-\Require Anchor $a$, $\Tips(G)$, window $w$, stake mode $\theta\in\{\mathsf{equal},\mathsf{stake}\}$
-\Ensure Preferred tip $\hat{T}$
+\Require Anchor $a$, $\Tips(G)$, window $w$, stake mode $\theta\in\{\mathsf{equal},\mathsf{stake}\}$\mnote{Stake mode is not used, maybe simplify?}
+\Ensure Preferred tip $\hat{T}$ \mnote{Set of?}
 \ForAll{$d\in V$ such that $a\leadsto d$}
   \State $\mathsf{score}(d) \gets 0$
 \EndFor
@@ -205,14 +205,14 @@ We assume each validator stores or can compute $\mathsf{score}(x)$ for each $x\i
 \State $W_i\gets\BranchW(i;c,w)$, \quad $W_j\gets\BranchW(j;c,w)$
 \If{$W_i > W_j$} \Return $i$
 \ElsIf{$W_j > W_i$} \Return $j$
-\Else \Return $\min\nolimits_{\prec}\{i,j\}$ \Comment{deterministic tie-break}
+\Else \Return $\min\nolimits_{\prec}\{i,j\}$ \Comment{deterministic tie-break}\mnote{The same as for \ProjIdeal, the block id is under control of the adversary, we could use a different (adversary-independent) mechanism for conflict resolution.}
 \EndIf
 \end{algorithmic}
 \end{algorithm}
 
 \begin{remark}
 Two conflicting transactions on different branches trigger the above resolution. The loser branch is pruned from the ledger view (though kept in the DAG for references).
-\end{remark}
+\end{remark} \mnote{Shouldn't this be done after block finalization? Are we assuming that a conflicted branch cannot be reorg-ed? I'm thinking about a case when an adversary reveals a conflicting branch to invalidate the other branch. This could happen especially when the adversary can exploit the tie-breaking mechanism and inject conflicting transactions to break the liveness. Just speculating here...}
 
 %\subsubsection*{Ledger Properties (Persistence and Liveness) in \ProjBase}
 %We claim that under conditions~\eqref{eq:base-params}, the ledger defined by $\ForkChoiceUpdate$ and $\CCA$-based conflicts satisfies persistence and liveness. (Details follow from Section~\ref{subsec:base-security}.)
@@ -228,13 +228,13 @@ $P$ may \emph{finalize} a block $B$ once it is $k$-deep under $\hat T_s$, with $
 
 \subsection{Security of the Practical Protocol}
 \label{subsec:base-security}
-We prove the DAG properties and ledger properties for \ProjBase under~\eqref{eq:base-params}. We write $\lambda_h \triangleq \mathbb{E}[\#\text{honest eligible per slot}]=\Theta(pH|\Val|)$.
+We prove the DAG properties and ledger properties for \ProjBase under~\eqref{eq:base-params}. We write $\lambda_h \triangleq \mathbb{E}[\#\text{honest eligible per slot}]=\Theta(pH|\Val|)$. \mnote{Maybe $lambda_H$ for consistency with $H$?}
 
 \subsubsection{Consensus properties: DG, DQ, TB, DCP}
 \begin{theorem}[DAG Growth (DG) in \ProjBase]
 \label{thm:base-DG}
 For any interval of $\ell$ slots after GST, at least $\tau_D\ell$ honest blocks become ancestors of some honest tip by time $s{+}\ell{-}1{+}\Delta$, with probability $1-\negl(\lambda)$, for $\tau_D=\Theta(pH)$.
-\end{theorem}
+\end{theorem} \mnote{Shouldn't it be scaled by the allowed number of references per block?}
 \begin{proof}[Proof sketch]
 Post-GST, in each slot $s$ the number of honest eligible is $\mathrm{Bin}(|\Val|,p\cdot \stakefrac{\cdot})$; Chernoff concentration gives $\Omega(\lambda_h)$ honest blocks per slot over $\ell$ slots. Delivery within $\Delta$ ensures these blocks are referenced by subsequent honest blocks inside the window $w\ge \Delta$, hence they become ancestors of honest tips.
 \end{proof}
@@ -270,7 +270,7 @@ Let $k=\Theta(w)$ be chosen so that in $w$ slots the honest branch accumulates a
 \end{theorem}
 \begin{proof}[Proof sketch]
 Consider a conflicting head $j$ and honest head $i$ with $c=\CCA(i,j)$. By DG, DQ, and TB, during any $w$-slot window after $c$ the honest branch contributes $\Omega(\lambda_h w)$ window-filtered references; the adversary contributes $O(\alpha |\Val| p w)$ \emph{only} to blocks \emph{actually created} within the window (withheld older references carry zero weight). Since $H>\tfrac{1}{2}{+}\varepsilon$, the honest margin in the window is positive with high probability and grows with $w$. After $k=\Theta(w)$ depth, any tie can no longer be reached by adversarial scheduling; anchored fork-choice and CCA resolution keep selecting the honest branch, preserving $B$.
-\end{proof}
+\end{proof}\mnote{I think that my speculation about the exploitation of the conflict resolution mechanism to control the branching could also be applied here, as the adversary could create conflicts and control which branch is perceived as conflict-free and grows. WDYT?}
 
 \begin{theorem}[Liveness of \ProjBase]
 \label{thm:base-liveness}
@@ -315,7 +315,7 @@ Long-refs guarantee global connectivity but carry zero weight. Implementations s
 \smallskip
 
 \noindent
-\textbf{Parameter Choices:} A window on the order of tens of slots (e.g., $w\approx 30$) typically suffices to cover network latency for a moderate honest block rate. The parallelism factor $N_{\MCP}$ tunes how many transactions each block samples, balancing leaderless throughput with verifier load.
+\textbf{Parameter Choices:} A window on the order of tens of slots (e.g., $w\approx 30$) typically suffices to cover network latency for a moderate honest block rate. The parallelism factor $N_{\MCP}$ tunes how many transactions each block samples, balancing leaderless throughput with verifier load. \mnote{I think that $N_{\MCP}$ should control the number of parallel blocks of fixed number of transactions.}
 
 \subsection{Cross-Section Correspondence (Sections \ref{sec:ideal} vs \ref{sec:base})}
 The following summary illustrates how the idealized protocol maps to \ProjBase:
