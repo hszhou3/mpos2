@@ -140,7 +140,7 @@ R & \text{otherwise.}
 \Ensure $b$ is accepted into $G$ or deferred/rejected
 \If{$b\in V$} \Return \EndIf
 \If{$\exists r\in \refs(b)$ such that $r\notin V$}
-  \State Request missing parent $r$; enqueue $b$; \Return \mnote{As in the \ProjIdeal, might be clearer to be explicit here so that we don't need to enqueue $$b$ and can reject it if $r$ is not available in a bounded time.}
+  \State Request missing parent $r$; enqueue $b$; \Return \mnote{As in the \ProjIdeal, might be clearer to be explicit here so that we don't need to enqueue $b$ and can reject it if $r$ is not available in a bounded time.}
 \EndIf
 \State $(\mathsf{ok}',\pi',y') \gets \VRFVerify(\pk(\val(b));\ \domsep\|\Encode(\chainid)\|\Encode(\netid)\|\Encode(\slot(b)), y(b), \pi(b))$
 \If{\textbf{not} $\mathsf{ok}'$ \textbf{or not} $\VerifySig(\pk(\val(b)); b, \sigma(b))$} 
