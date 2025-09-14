@@ -43,7 +43,7 @@ We describe the per-slot state machine of an \emph{honest} node $P$; we explicit
 %(Depending on global numbering these appear as Algorithms~6–9.)
 
 \paragraph{Start of slot $s$.}
-$P$ maintains a local DAG $G_s=(V_s,E_s)$ and a ledger state view induced by its \emph{preferred tip}. It also caches reachability summaries and a per-validator latest-block map.
+$P$ maintains a local DAG $G_s=(V_s,E_s)$ and a ledger state view induced by its \emph{preferred frontier}. It also caches reachability summaries and a per-validator latest-block map.
 
 \begin{enumerate}
   \item \textbf{Eligibility \& transaction sampling.}
@@ -68,10 +68,10 @@ $P$ maintains a local DAG $G_s=(V_s,E_s)$ and a ledger state view induced by its
   \[
   W(T)=\sum_{\substack{d\in\Desc^*(T)\\a\leadsto d}}\mathrm{contrib}(d)\cdot \wref(d;w),
   \]
-  set preferred tip $\hat T_s\in\arg\max W(T)$ (tie-break by $(\slot,\id)$), and expose the induced ledger order.
+  set preferred frontier $\hat T_s\in\arg\max W(T)$ (tie-break by $(\slot,\id)$), and expose the induced ledger order.
 
   \item \textbf{Conflict resolution via CCA (Alg.~\ref{alg:cca-resolve}, on demand).}
-  When two incomparable heads $i,j$ imply conflicting states, $P$ computes $c=\CCA(i,j)$ and compares $\BranchW(i;c,w)$ vs.\ $\BranchW(j;c,w)$. The winner determines which subtree remains eligible for inclusion in the preferred branch. This decision is \emph{consistent} with the anchored fork-choice (the preferred tip must lie on the heavier branch past the CCA).
+  When two incomparable heads $i,j$ imply conflicting states, $P$ computes $c=\CCA(i,j)$ and compares $\BranchW(i;c,w)$ vs.\ $\BranchW(j;c,w)$. The winner determines which subtree remains eligible for inclusion in the preferred branch. This decision is \emph{consistent} with the anchored fork-choice (the preferred frontier must lie on the heavier branch past the CCA).
 \end{enumerate}
 
 %\newpage
@@ -178,7 +178,7 @@ The integration logic assumes one-slot network delays for simplicity. In practic
 \label{alg:fork-choice}
 \begin{algorithmic}[1]
 \Require Anchor $a$, $\Tips(G)$, window $w$, stake mode $\theta\in\{\mathsf{equal},\mathsf{stake}\}$
-\Ensure Preferred tip $\hat{T}$
+\Ensure preferred frontier $\hat{T}$
 \ForAll{$d\in V$ such that $a\leadsto d$}
   \State $\mathsf{score}(d) \gets 0$
 \EndFor
@@ -257,16 +257,16 @@ Within any $\Delta$-slot horizon, honest blocks produced without mutual visibili
 
 \begin{theorem}[DAG Common Past (DCP) in \ProjBase]
 \label{thm:base-DCP}
-There exists $k_D=\Theta(\Delta)$ such that, after removing the last $k_D$ layers under the preferred tips of any two honest parties, the remaining ancestor sets coincide w.h.p.
+There exists $k_D=\Theta(\Delta)$ such that, after removing the last $k_D$ layers under the preferred frontiers of any two honest parties, the remaining ancestor sets coincide w.h.p.
 \end{theorem}
 \begin{proof}[Proof sketch]
-By TB, the honest frontier has bounded width $O(\lambda_h\Delta)$. After $\Delta$ slots, all honest blocks from earlier slots are visible to all honest parties and get cross-referenced within the window, causing the CCA between any two preferred tips to move forward monotonically. Trimming the last $\Theta(\Delta)$ layers removes the area where asynchrony can cause transient divergence, leaving an identical common past.
+By TB, the honest frontier has bounded width $O(\lambda_h\Delta)$. After $\Delta$ slots, all honest blocks from earlier slots are visible to all honest parties and get cross-referenced within the window, causing the CCA between any two preferred frontiers to move forward monotonically. Trimming the last $\Theta(\Delta)$ layers removes the area where asynchrony can cause transient divergence, leaving an identical common past.
 \end{proof}
 
 \subsubsection{Ledger properties: Persistence and Liveness}
 \begin{theorem}[Persistence (Safety) of \ProjBase]
 \label{thm:base-safety}
-Let $k=\Theta(w)$ be chosen so that in $w$ slots the honest branch accumulates a fixed constant margin of window-filtered weight against any competing branch past the same CCA. If a block $B$ is $k$-deep under an honest party's preferred tip at time $t$, then with probability $1-\negl(\lambda)$, $B$ remains in every honest party's ledger at all later times.
+Let $k=\Theta(w)$ be chosen so that in $w$ slots the honest branch accumulates a fixed constant margin of window-filtered weight against any competing branch past the same CCA. If a block $B$ is $k$-deep under an honest party's preferred frontier at time $t$, then with probability $1-\negl(\lambda)$, $B$ remains in every honest party's ledger at all later times.
 \end{theorem}
 \begin{proof}[Proof sketch]
 Consider a conflicting head $j$ and honest head $i$ with $c=\CCA(i,j)$. By DG, DQ, and TB, during any $w$-slot window after $c$ the honest branch contributes $\Omega(\lambda_h w)$ window-filtered references; the adversary contributes $O(\alpha |\Val| p w)$ \emph{only} to blocks \emph{actually created} within the window (withheld older references carry zero weight). Since $H>\tfrac{1}{2}{+}\varepsilon$, the honest margin in the window is positive with high probability and grows with $w$. After $k=\Theta(w)$ depth, any tie can no longer be reached by adversarial scheduling; anchored fork-choice and CCA resolution keep selecting the honest branch, preserving $B$.
