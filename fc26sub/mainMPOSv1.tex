@@ -200,7 +200,8 @@ Marcin Pawlowski\footnote{Institute of Free Technology and Jagiellonian Universi
 \and
 Hong-Sheng Zhou\footnote{Virginia Commonwealth University and Institute of Free Technology. \ \ \texttt{hszhou@vcu.edu}}
 }
-\author{}
+
+\author{\vspace{-1cm}}
 \institute{}
 
 \maketitle
@@ -209,7 +210,7 @@ Hong-Sheng Zhou\footnote{Virginia Commonwealth University and Institute of Free 
 
 
 
-\setcounter{tocdepth}{2}
+%\setcounter{tocdepth}{2}
 \setcounter{secnumdepth}{3}
 \pagestyle{plain}
 
@@ -217,12 +218,12 @@ Hong-Sheng Zhou\footnote{Virginia Commonwealth University and Institute of Free 
 
 
 %\newpage
-\small
-\tableofcontents
-\normalsize
+%\small
+%\tableofcontents
+%\normalsize
 
-\newpage
-\pagenumbering{arabic}
+%\newpage
+%\pagenumbering{arabic}
 
 
 \input{sec1}
@@ -241,8 +242,12 @@ Hong-Sheng Zhou\footnote{Virginia Commonwealth University and Institute of Free 
 
 \bibliographystyle{alpha}
 \bibliography{../crypto/abbrev3,../crypto/crypto,../crypto/extra,../crypto/extra3}
+\appendix
 
-\input{appendix1}
+
+\input{app-sec2}
+\input{app-sec4} %\input{appendix1}
+
 
 \end{document}
 
