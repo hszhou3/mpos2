@@ -1,0 +1,31 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Appendix A: Dilworth (Antichain)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\appendix
+\section{Exact Antichain Computation via Dilworth's Theorem}
+\label{sec:appendix-dilworth}
+
+In Section~\ref{sec:base} we described reference selection using a greedy heuristic to construct a large antichain in the window-DAG $G_{s,w}$. This heuristic is efficient and scales well for large windows (e.g., $w \ge 30$). 
+
+For small window sizes, however, one can optionally compute the \emph{maximum-cardinality antichain} exactly, using Dilworth's theorem:
+
+\begin{theorem}[Dilworth, 1950]
+In any finite partially ordered set $(P,\preceq)$, the size of the largest antichain equals the minimum number of chains in a partition of $P$.
+\end{theorem}
+
+This equivalence enables a polynomial-time algorithm: by constructing a bipartite graph representing comparabilities in the DAG's transitive reduction, the maximum antichain problem reduces to a maximum matching problem. Solving this yields the exact maximum antichain, which honest validators may use for reference selection.
+
+\paragraph{Transitive Reduction.}
+Since redundant edges do not affect comparability, we may safely compute the \emph{transitive reduction} of $G_{s,w}$ before applying Dilworth’s algorithm. This reduces the input size and improves runtime.
+
+\paragraph{Complexity.}
+Computing the exact maximum antichain requires solving a maximum matching instance with complexity roughly $O(|V|^{2.5})$ using Hopcroft–Karp. While practical for small window sizes, this is less efficient than greedy heuristics for large $w$.
+
+\paragraph{Summary.}
+Thus, \Proj can be instantiated with either:
+\begin{itemize}
+  \item a greedy (approximate but deterministic) antichain construction for large windows,
+  \item or an exact Dilworth-based method for small windows where optimality is affordable.
+\end{itemize}
+Both approaches preserve safety and liveness properties, with the exact method ensuring honest validators always maximize reference fan-in.
+

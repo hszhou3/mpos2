@@ -1,0 +1,223 @@
+%\documentclass[manuscript,nonacm,anonymous]{acmart}
+%\documentclass[10pt]{article}
+\documentclass[11pt]{article}
+%\documentclass[10pt]{llncs}
+%\documentclass[runningheads,a4paper]{llncs}
+
+% Packages
+\usepackage[english]{babel}
+\usepackage[letterpaper,hmargin=1in,vmargin=1in]{geometry}
+\usepackage{palatino}
+\usepackage{xspace,xcolor,amsmath,mathtools,amssymb,amsfonts,amsthm}
+\usepackage[svgnames,x11names,table]{xcolor}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{float} % for [H] float spec
+\usepackage{multirow}
+\usepackage{wrapfig}
+\usepackage{caption}
+\usepackage{subfig}
+\usepackage{dsfont}
+\usepackage[mathscr]{eucal}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true,citecolor=blue,urlcolor=blue,bookmarks=false,hypertexnames=true}
+\urlstyle{same}
+\usepackage{array}
+\usepackage{booktabs}
+%\usepackage{tikz}
+%\usetikzlibrary{arrows.meta,calc,positioning}
+
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,calc,positioning,decorations.pathreplacing}
+
+%\lstset{escapeinside={(}{)}}
+
+% Algorithmic keywords
+\algrenewcommand\algorithmicrequire{\textbf{Input:}}
+\algrenewcommand\algorithmicensure{\textbf{Output:}}
+
+% Theorem environments
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{lemma}[theorem]{Lemma}
+
+% Fonts and mathcal
+\DeclareMathAlphabet{\mathcal}{OMS}{cmsy}{m}{n}
+
+\newcommand{\ignore}[1]{}
+\newcommand{\hnote}[1]{{\color{DarkBlue}{\it [{\bf Hongsheng:} #1]}}}
+\newcommand{\mnote}[1]{{\color{red}{\it [{\bf Marcin:} #1]}}}
+\newcommand{\anote}[1]{{\color{DarkRed}{\it [{\bf Alvaro:} #1]}}}
+
+% Project names
+\newcommand{\Proj}{\ensuremath{\mathsf{Cryptareon}}\xspace}
+\newcommand{\ProjZero}{\ensuremath{\mathsf{Cryptareon\text{-}Ideal}}\xspace}
+\newcommand{\ProjIdeal}{\ensuremath{\mathsf{Cryptareon\text{-}Ideal}}\xspace}
+\newcommand{\ProjOne}{\ensuremath{\mathsf{Cryptareon\text{-}Base}}\xspace}
+\newcommand{\ProjBase}{\ensuremath{\mathsf{Cryptareon\text{-}Base}}\xspace}
+\newcommand{\ProjTwo}{\ensuremath{\mathsf{Cryptareon\text{-}Full}}\xspace}
+\newcommand{\ProjFull}{\ensuremath{\mathsf{Cryptareon\text{-}Full}}\xspace}
+\newcommand{\ProjThree}{\ensuremath{\mathsf{Cryptareon\text{-}Private}}\xspace}
+\newcommand{\ProjPrivate}{\ensuremath{\mathsf{Cryptareon\text{-}Private}}\xspace}
+
+% Core symbols
+\newcommand{\secp}{\ensuremath{\lambda}\xspace}
+\newcommand{\negl}{\ensuremath{\mathsf{negl}}\xspace}
+
+\newcommand{\state}{\ensuremath{\mathit{state}}\xspace}
+\newcommand{\cZ}{\ensuremath{\mathscr{Z}}\xspace}
+\newcommand{\cA}{\ensuremath{\mathscr{A}}\xspace}
+\newcommand{\cP}{\ensuremath{\mathscr{P}}\xspace}
+\newcommand{\exec}{\ensuremath{\mathsf{EXEC}}\xspace}
+\newcommand{\chain}{\ensuremath{\mathcal{C}}\xspace}
+\newcommand{\Chain}{\ensuremath{\mathcal{C}}\xspace}
+\newcommand{\subchain}[2]{\ensuremath{\Chain_{#1}[{#2}]}\xspace}
+\newcommand{\len}{\ensuremath{\mathsf{len}}\xspace}
+\newcommand{\cut}{\ensuremath{\neg}\xspace}
+\newcommand{\chainset}{\ensuremath{\mathds{C}}\xspace}
+\newcommand{\View}{\ensuremath{\mathtt{VIEW}}\xspace}
+\newcommand{\RR}{\ensuremath{\mathbb{R}}\xspace}
+\newcommand{\NN}{\ensuremath{\mathbb{N}}\xspace}
+\renewcommand{\P}{\ensuremath{\mathit{P}}\xspace}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Global notation and macros (used by Sections 3 and 4)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Sets and functions
+\newcommand{\Val}{\ensuremath{\mathcal{V}}\xspace}
+\newcommand{\Slot}{\ensuremath{\mathcal{S}}\xspace}
+\newcommand{\Tx}{\ensuremath{\mathcal{T}}\xspace}
+\newcommand{\Id}{\ensuremath{\mathcal{I}}\xspace}
+
+% Keys, stake, and fractions
+\newcommand{\pk}{\ensuremath{\mathrm{pk}}\xspace}
+\newcommand{\sk}{\ensuremath{\mathrm{sk}}\xspace}
+\newcommand{\stake}{\ensuremath{\mathrm{stake}}\xspace}
+\newcommand{\StakeTot}{\ensuremath{\mathrm{Stake}{\mathrm{tot}}}\xspace}
+\newcommand{\stakefrac}[1]{\ensuremath{\frac{\stake(#1)}{\StakeTot}}\xspace}
+
+% Block accessors
+\newcommand{\id}{\ensuremath{\mathrm{id}}\xspace}
+\newcommand{\val}{\ensuremath{\mathrm{validator}}\xspace}
+\newcommand{\slot}{\ensuremath{\mathrm{slot}}\xspace}
+\newcommand{\txs}{\ensuremath{\mathrm{txs}}\xspace}
+\newcommand{\tx}{\ensuremath{\mathtt{tx}}\xspace}
+\newcommand{\refs}{\ensuremath{\mathrm{refs}}\xspace}
+\newcommand{\shortrefs}{\ensuremath{\mathrm{refs}{\mathrm{in}}}\xspace}
+\newcommand{\longrefs}{\ensuremath{\mathrm{refs}{\mathrm{out}}}\xspace}
+\newcommand{\longref}{\ensuremath{\mathrm{longref}}\xspace}
+
+% DAG reachability and closures
+\newcommand{\Anc}{\ensuremath{\mathrm{Anc}}\xspace}
+\newcommand{\Desc}{\ensuremath{\mathrm{Desc}}\xspace}
+
+% Ledger and conflicts
+\newcommand{\Valid}{\ensuremath{\mathrm{Valid}}\xspace}
+\newcommand{\Conflicts}{\ensuremath{\mathrm{Conflicts}}\xspace}
+\newcommand{\Inputs}{\ensuremath{\mathrm{Inputs}}\xspace}
+
+% Tips and orders
+\newcommand{\Tips}{\ensuremath{\mathrm{Tips}}\xspace}
+\newcommand{\Lin}{\ensuremath{\mathsf{Lin}}}
+
+% Procedures / primitives
+\newcommand{\Eligibility}{\ensuremath{\textsc{Eligibility}}\xspace}
+\newcommand{\VRFSign}{\ensuremath{\mathrm{VRFSign}}\xspace}
+\newcommand{\VRFVerify}{\ensuremath{\mathrm{VRFVerify}}\xspace}
+\newcommand{\VerifySig}{\ensuremath{\mathrm{VerifySig}}\xspace}
+\newcommand{\Sign}{\ensuremath{\mathrm{Sign}}\xspace}
+\newcommand{\Hash}{\ensuremath{\mathrm{Hash}}\xspace}
+
+\newcommand{\domsep}{\ensuremath{\mathtt{Cryptareon}}\xspace}
+\newcommand{\chainid}{\ensuremath{\mathrm{chainid}}\xspace}
+\newcommand{\netid}{\ensuremath{\mathrm{netid}}\xspace}
+\newcommand{\Encode}{\ensuremath{\mathrm{enc}}\xspace}
+
+% Function-name macros used in pseudocode
+\newcommand{\ExactMaxAntichain}{\textsc{ExactMaxAntichain}\xspace}
+\newcommand{\GreedyAntichain}{\textsc{GreedyAntichain}\xspace}
+\newcommand{\SampleMempool}{\textsc{SampleMempool}\xspace}
+\newcommand{\OptionalLongRef}{\textsc{OptionalLongRef}\xspace}
+\newcommand{\IntegrateAndGossip}{\textsc{IntegrateAndGossip}\xspace}
+\newcommand{\AntichainSelection}{\textsc{AntichainSelection}\xspace}
+\newcommand{\Broadcast}{\textsc{Broadcast}\xspace}
+
+\newcommand{\ForkChoiceUpdate}{\textsc{ForkChoiceUpdate}\xspace}
+
+% Fork-choice metrics
+\newcommand{\wref}{\ensuremath{\mathrm{wref}}\xspace}
+\newcommand{\BranchW}{\ensuremath{\mathrm{BranchW}}\xspace}
+\newcommand{\CA}{\ensuremath{\mathrm{CA}}\xspace}
+\newcommand{\CCA}{\ensuremath{\mathrm{CCA}}\xspace}
+\newcommand{\contrib}{\ensuremath{\mathrm{contrib}}\xspace}
+\newcommand{\refsin}{\ensuremath{\mathrm{refsin}}\xspace}
+
+\newcommand{\SelectTxs}{\mathsf{SelectTxs}}
+\newcommand{\Merkle}{\mathsf{Merkle}}
+
+
+% Misc
+\newcommand{\MCP}{\ensuremath{\mathrm{MCP}}\xspace}
+
+\begin{document}
+
+\title{
+Cryptareon: Latency-Friendly Resilient Multi-Proposer Consensus
+%\footnote{We refer interested readers to Álvaro Castro-Castilla’s ``New Cryptarchia,'' available at \url{https://www.notion.so/nomos-tech/New-Cryptarchia-202261aa09df8026b31ad5e09c1a3fbb}.}
+\\
+{\small {\sc Work in progress; Early draft}}
+}
+\author{
+Álvaro Castro-Castilla\footnote{Institute of Free Technology. \ \ \texttt{alvaro@status.im}}
+\and
+Marcin Pawlowski\footnote{Institute of Free Technology and Jagiellonian University. \ \ \texttt{marcin@status.im}}
+\and
+Hong-Sheng Zhou\footnote{Virginia Commonwealth University and Institute of Free Technology. \ \ \texttt{hszhou@vcu.edu}}
+}
+
+\maketitle
+
+
+
+
+
+\setcounter{tocdepth}{2}
+\setcounter{secnumdepth}{3}
+\pagestyle{plain}
+
+\input{abstract}
+
+
+\newpage
+\small
+\tableofcontents
+\normalsize
+
+\newpage
+\pagenumbering{arabic}
+
+
+\input{sec1}
+\input{sec2}
+
+%\input{sec3}
+\input{sec3v2}
+
+
+
+\input{sec4}
+%\input{sec4_updated2}
+
+\input{sec5-experiment}
+\input{sec6-related}
+
+\bibliographystyle{alpha}
+\bibliography{../crypto/abbrev3,../crypto/crypto,../crypto/extra,../crypto/extra3}
+
+\input{appendix1}
+
+\end{document}
+
