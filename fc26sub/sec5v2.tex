@@ -1,3 +1,5 @@
+%!TEX root = mainMPOSv1.tex
+
 \section{Implementation and Evaluation}
 \label{sec:impl-eval}
 This section reports the empirical evaluation of \ProjBase. We built a discrete-event simulator and compared \ProjBase to Ouroboros Praos with a focus on reorg depth under increasing chain parallelization. The simulator abstracts away non-essential details to isolate ledger growth and reorg behavior under configurable adversarial stake, network delay, and block-production parallelism (number of concurrent proposers).
