@@ -1,6 +1,33 @@
 
 %!TEX root = mainMPOSv1.tex
-
 \begin{abstract}
-We present \Proj, a family of latency-friendly, stake-weighted, leaderless proof-of-stake consensus protocols. By allowing multiple proposers per slot and using a directed acyclic graph (DAG) structure, \Proj achieves high throughput and robustness. Blocks reference each other within a sliding window, forming maximal antichains that represent parallel “votes” on history. Conflicting branches are resolved via the closest common ancestor (CCA): each branch's weight (sum of recent references) is compared, and the heavier branch is chosen. This aggregation of honest work leads to rapid finality even under network delays and adversarial conditions. We define an idealized protocol (\ProjIdeal) that abstracts away delays and bounded references, and a practical variant (\ProjBase) that incorporates VRF-based eligibility, UTXO validity, and bounded references. We prove security in the partially synchronous model by formulating DAG analogs of common-prefix, chain-growth, and chain-quality properties. Our evaluation shows that \Proj achieves low latency and high finality rate with high adversarial stake, outperforming traditional chain-based and earlier DAG-based protocols.
+We present \emph{Cryptareon}, a leaderless proof-of-stake (PoS) family for \emph{latency-friendly} and resilient multi-proposer consensus. In Cryptareon, validators can propose concurrently each slot and organize blocks in a DAG. Blocks reference recent predecessors within a sliding window, creating antichains that act as parallel votes. Conflicts are resolved locally at the \emph{closest common ancestor (CCA)} using \emph{window-filtered} reference weights, which aggregates honest work rapidly and prevents long-range ambushes from withheld blocks.
+
+We extend the blockchain backbone to DAGs via four invariants—\emph{DAG Growth}, \emph{DAG Quality}, \emph{DAG Common Past}, and a new \emph{Tip Boundedness}—and show TB is necessary for persistence and liveness. We define \emph{Cryptareon-Ideal} (synchronous, unbounded references, public-coin eligibility) and \emph{Cryptareon-Base} (partial synchrony, VRF eligibility, bounded short refs with optional weight-0 long-ref, UTXO validity), and we give a clean Ideal$\to$Base correspondence. Under standard PoS assumptions and \(w\!\ge\!\Delta\), we prove persistence and liveness. Our evaluation indicates lower confirmation latency and higher throughput than single-proposer chains and improved robustness compared to prior DAG-style designs under high delay and adversarial stake.
 \end{abstract}
+
+
+
+
+%\begin{abstract}
+%We present \emph{Cryptareon}, a family of stake-weighted, leaderless proof-of-stake (PoS) consensus protocols designed for high throughput and \emph{latency-friendly} finality. Cryptareon departs from single-proposer blockchains by allowing multiple validators to propose blocks concurrently within each slot, which are organized in a directed acyclic graph (DAG). This design aggregates honest work across parallel branches and rapidly reconciles temporary forks. 
+
+%Our approach builds on two key ideas: (i) a \emph{closest common ancestor} (CCA) fork-choice rule that compares branches locally, preventing long-range ambushes, and (ii) bounded-window reference weights, ensuring security under partial synchrony and adversarial scheduling. We formalize new DAG invariants---growth, quality, common past, and tip boundedness---that extend the classical backbone properties, and we prove persistence and liveness under standard PoS assumptions. 
+
+%We present two variants: \emph{Cryptareon-Ideal}, an idealized synchronous protocol that highlights the core consensus logic, and \emph{Cryptareon-Base}, a practical instantiation that uses VRF-based eligibility, bounded references, and UTXO validity checks. Our evaluation demonstrates that Cryptareon achieves higher throughput and lower confirmation latency than traditional chain-based PoS protocols and outperforms earlier DAG-based proposals, even under significant network delay and adversarial stake.
+%\end{abstract}
+
+
+
+
+
+%\begin{abstract}
+
+%We present \Proj, a family of latency-friendly, stake-weighted, leaderless proof-of-stake consensus protocols. By allowing multiple proposers per slot and using a directed acyclic graph (DAG) structure, \Proj achieves high throughput and robustness. Blocks reference each other within a sliding window, forming maximal antichains that represent parallel “votes” on history. Conflicting branches are resolved via the closest common ancestor (CCA): each branch's weight (sum of recent references) is compared, and the heavier branch is chosen. This aggregation of honest work leads to rapid finality even under network delays and adversarial conditions. We define an idealized protocol (\ProjIdeal) that abstracts away delays and bounded references, and a practical variant (\ProjBase) that incorporates VRF-based eligibility, UTXO validity, and bounded references. We prove security in the partially synchronous model by formulating DAG analogs of common-prefix, chain-growth, and chain-quality properties. Our evaluation shows that \Proj achieves low latency and high finality rate with high adversarial stake, outperforming traditional chain-based and earlier DAG-based protocols.
+
+
+
+%We present \Proj, a family of latency-friendly, stake-weighted, leaderless proof-of-stake consensus protocols. By enabling multiple proposers per slot and organizing blocks in a directed acyclic graph (DAG), \Proj attains high throughput and rapid convergence under realistic network conditions. Each block references a large antichain of recent blocks within a sliding window, so references aggregate as implicit “votes” for history. Conflicts are resolved locally at the closest common ancestor (CCA): branches are compared by a window-filtered weight that counts only recent references, optionally stake-weighted. This CCA-anchored, sliding-window fork choice neutralizes long-range withholding and yields fast finality once one branch leads within the window.
+
+%We formalize DAG analogues of classical backbone properties—DAG Growth (DG), DAG Quality (DQ), and DAG Common Past (DCP)—and show they must be paired with Tip Boundedness (TB) to guarantee ledger safety and liveness. We analyze an idealized protocol (\ProjIdeal) under synchrony with unbounded referencing, and a practical protocol (\ProjBase) under partial synchrony with VRF sortition, bounded short references (plus an optional long reference for connectivity), and UTXO validity. Under standard PoS assumptions with honest stake $H > 1/2$ and window $w \ge \Delta$, we prove persistence and liveness, deriving $k = \Theta(w)$ confirmation depth. Simulations indicate low latency to finality and strong robustness against optimized reorg attempts, outperforming chain-based and prior DAG-based baselines across adversarial stake and network delay regimes.
+%\end{abstract}

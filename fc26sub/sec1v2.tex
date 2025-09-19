@@ -1,0 +1,41 @@
+
+%!TEX root = mainMPOSv1.tex
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Section 1: Introduction
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Introduction}
+\label{sec:intro}
+
+A recurring tension in blockchain design is to achieve high throughput and low latency without compromising security or decentralization. Traditional single-proposer (leader-based) protocols---from Bitcoin's longest chain to many proof-of-stake (PoS) variants---extend a single linear chain one block at a time. This serialization simplifies reasoning but forces a conservative block rate to preserve the \emph{common prefix} and \emph{chain quality} properties under network delay. If blocks are proposed faster than they propagate, honest views diverge, forks proliferate, and safety and liveness degrade. As a result, single-proposer designs deliberately throttle throughput, which prolongs confirmation latency.
+
+Single-leader systems are also brittle under adverse conditions: even moderate asynchrony or partitions can trigger deep reorganizations, and a slow or malicious leader can temporarily suppress transactions, harming liveness and fairness. The upshot is a fundamental scalability--security trade-off: increasing throughput or tolerating higher latency in the network tends to weaken safety guarantees.
+
+\subsection{From single-leader chains to multi-proposer DAGs}
+A natural way to increase information flow and reduce latency is to remove the single-leader bottleneck. In \emph{multi-proposer} (leaderless) designs, many validators can propose in parallel. If blocks are allowed to reference multiple recent predecessors rather than just one, the data structure becomes a directed acyclic graph (DAG). With this structure, a block can simultaneously “vote” for many concurrent tips, so honest work accumulates even in the presence of temporary network-induced forks. In effect, the system exploits available bandwidth and validator capacity: all eligible validators in a slot may contribute, and their references implicitly merge honest views over time.
+
+\paragraph{Fork choice via CCA and a sliding window.}
+To reconcile parallel growth into a single ledger, we adopt a fork-choice rule that is (i) \emph{local}, comparing branches from their closest common ancestor (CCA), and (ii) \emph{window-filtered}, counting only recent references (within the last $w$ slots) to prevent long-range withholding from inflating weight. Each new block adds unit (or stake-proportional) weight to the branch it extends. Honest validators extend their currently preferred branch and reference a large antichain of recent blocks; this aggregates honest “votes” quickly. Once one branch gains a lead within the sliding window, the CCA-anchored comparison makes it hard for a minority to overtake, yielding rapid convergence and latency-friendly finality.
+
+\subsection{What we propose: a latency-friendly, leaderless PoS DAG}
+We present \Proj, a family of stake-weighted, leaderless PoS protocols designed for low-latency finality and robustness under partial synchrony:
+\begin{itemize}
+\item \textbf{\ProjIdeal} abstracts away delays and bounded references to highlight core consensus dynamics under synchrony and unbounded referencing.
+\item \textbf{\ProjBase} instantiates a practical protocol with VRF-based eligibility, UTXO validity, bounded short references (plus an optional long reference that carries no weight for connectivity), and a CCA-anchored, window-filtered fork choice.
+\end{itemize}
+A central message of our analysis is that classical chain invariants do not directly lift to multi-proposer DAGs. We formalize DAG analogues of backbone properties---\emph{DAG Growth (DG)}, \emph{DAG Quality (DQ)}, and \emph{DAG Common Past (DCP)}---and show they must be paired with a fourth invariant, \emph{Tip Boundedness (TB)}, which caps the width of the honest frontier. Without TB, honest work can fragment indefinitely across many incomparable tips, preventing either safety or liveness even when DG/DQ/DCP hold.
+
+\subsection{Our contributions}
+\begin{itemize}
+	\item \textbf{\ProjIdeal (idealized protocol).} We formalize a leaderless multi-proposer DAG protocol under synchrony and unbounded referencing, together with a CCA-anchored, window-filtered fork choice. We prove DG, DQ, DCP, TB, and derive persistence and liveness with confirmation depth $k = \Theta(w)$.
+	\item \textbf{\ProjBase (practical protocol).} We realize the design under partial synchrony with VRF sortition, bounded short references (window $w$), and an optional weightless long reference for connectivity. We prove that under standard PoS assumptions (honest stake $H>1/2$) and $w \ge \Delta$, \ProjBase satisfies DG/DQ/DCP/TB and thus achieves persistence and liveness; withheld work outside the window does not help the adversary.
+	\item \textbf{Backbone-style DAG invariants.} We adapt classical backbone arguments to a multi-proposer DAG by introducing DG/DQ/DCP and identifying \emph{Tip Boundedness} as a necessary invariant: DG/DQ/DCP alone do not imply ledger safety or liveness in a DAG.
+	\item \textbf{Latency-friendly convergence.} The CCA-local, sliding-window fork choice aggregates honest references quickly and resists long-range withholding, enabling fast convergence once a windowed margin appears. This explains the observed low-latency finality in our simulations.
+	\item \textbf{Evaluation.} Our simulator implements \ProjBase with an optimized adversary that withholds and releases DAG subtrees. Across a range of adversarial stakes and network delays, \Proj achieves consistently low reorg depths and fast stabilization, outperforming chain-based and earlier DAG-based baselines at comparable throughput.
+\end{itemize}
+
+\paragraph{Design discipline.}
+Two parameter choices are critical: (i) a window $w$ at least as large as the post-GST delay bound $\Delta$ (otherwise honest tips may expire before cross-linking), and (ii) a parallelism level that preserves verifiability while leveraging validator capacity. Optional transaction sub-sampling (or verifiable random selection) can trade bandwidth for faster inclusion, without affecting safety.
+
+\paragraph{Related work.}
+Our work builds on the Bitcoin backbone framework for chain protocols~\cite{EC:GarKiaLeo15} and its PoS variants (e.g., Snow White~\cite{FC:DaiPasShi19}, Ouroboros Praos/Genesis~\cite{EC:DGKR18,CCS:BGKRZ18}). Committee/BFT-style PoS protocols such as Algorand~\cite{Algorand}, HotStuff~\cite{HotStuff}, and Dfinity~\cite{Dfinity} achieve fast finality via explicit voting, at higher communication cost. Multi-proposer and DAG-based approaches include Spectre~\cite{EPRINT:MorKulYok18}, PRISM~\cite{Prism}, Tree-Graph~\cite{EPRINT:ZhaChaLeo18}, PHANTOM/GHOSTDAG~\cite{AFT:SWZ21}, Conflux (related line), and Avalanche~\cite{SnowFamily}; Narwhal–Tusk~\cite{NarwhalTusk} decouples data availability from ordering within BFT. We differ in two ways: (i) our fork choice is explicitly \emph{CCA-anchored and window-filtered}, which neutralizes long-range withholding without auxiliary gadgets, and (ii) our security proof identifies and uses the quartet DG/DQ/DCP plus \emph{Tip Boundedness} as the right DAG analogue of chain backbone properties, showing TB is necessary for ledger safety and liveness under partial synchrony. Our analysis also connects to long-delay attacks in asynchronous settings~\cite{EC:PasSeeShe17}: the windowed, CCA-local rule together with TB serves as the DAG counterpart to the synchrony assumptions needed to preclude such attacks in chains. We further relate to unpredictability and eligibility design, and to economic and inclusion-list mechanisms orthogonal to our fork choice.
