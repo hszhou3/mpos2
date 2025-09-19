@@ -6,14 +6,14 @@
 
 
 
-\section{Security Model}
+\section{Security Model} \mnote{This section only is 9 pages, we must be brutal with it...}
 \label{sec:model}
 
 We adopt a standard cryptographic model for blockchain protocols~\cite{EC:GarKiaLeo15,EC:PasSeeShe17,JC:Canetti00}. The system comprises a set of validators $\cP$ and an environment $\cZ$ controlling inputs, timing, and corruptions. Time is divided into discrete slots $s=1,2,\ldots$. We assume a partially synchronous network~\cite{DLS88,EC:PasSeeShe17}: after some unknown Global Stabilization Time (GST), all honest messages are delivered within a known bound $\Delta$; before GST, the adversary controls delays. 
 
-Players start from a common genesis block containing initial public keys and stake distribution. Validators may join or leave, and stake may change over time; for simplicity we consider a “flat” model where any player can register multiple identities to simulate more stake. The adversary $\cA$, controlled by $\cZ$, may adaptively corrupt validators up to a fraction $\alpha$ of total stake $\StakeTot=\sum_{v\in\cP}\stake(v)$. We assume $\alpha < 1/2$ unless otherwise specified. Upon corruption, $\cA$ learns the validator's secret key and internal state. Honest parties erase state upon leaving (non-persistent corruption).
+Players start from a common genesis block containing initial public keys and stake distribution. Validators may join or leave, and stake may change over time; for simplicity we consider a “flat” model where any player can register multiple identities to simulate more stake. The adversary $\cA$, controlled by $\cZ$, may adaptively corrupt validators up to a fraction $\alpha$ of total stake $\StakeTot=\sum_{v\in\cP}\stake(v)$. We assume $\alpha < 1/2$ unless otherwise specified. Upon corruption, $\cA$ learns the validator's secret key and internal state. Honest parties erase state upon leaving (non-persistent corruption). \mnote{The corruption is not directly used, maybe be removed?}
 
-The network is adversarial: the adversary $\cA$ controls message scheduling, reordering, and can delay honest messages (subject to the $\Delta$ bound after GST) but cannot modify or forge them. Any message broadcast by an honest party reaches all honest parties within at most $\Delta$ slots (after GST). 
+The network is adversarial: the adversary $\cA$ controls message scheduling, reordering, and can delay honest messages (subject to the $\Delta$ bound after GST) but cannot modify or forge them. Any message broadcast by an honest party reaches all honest parties within at most $\Delta$ slots (after GST). \mnote{This adversary is not really used in our setting -- it's too powerful. Delete?}
 
 \paragraph{VRF-based Eligibility.} Each validator $v$ holds a key pair $(\pk_v,\sk_v)$ and stake $\stake(v)$. In slot $s$, validator $v$ computes a VRF with domain separation:
 \begin{equation*}
@@ -457,7 +457,7 @@ now apply to a bounded set of preferred branches rather than an unbounded
 frontier.
 \end{remark}
 
-\paragraph{Why TB Is Necessary.}
+\paragraph{Why TB Is Necessary.} \mnote{This is very informative but might not be worthy to fit it under 15-pages limit the whole thing. Or we could move it appendix?}
 If the number of honest tips is unbounded, then:
 
 \begin{itemize}
@@ -493,7 +493,7 @@ If the number of honest tips is unbounded, then:
 The no-redundancy assumption highlights a sharp failure mode without TB, but real DAG deployments
 typically exhibit \emph{natural redundancy}: multiple honest proposers include the same transaction across
 concurrent branches. This redundancy cushions liveness: even if some blocks become stranded, the \emph{transaction}
-still appears on other branches that the fork-choice later prefers.
+still appears on other branches that the fork-choice later prefers. \mnote{This redundancy also reduces the effectiveness of a reorg execution. Attacking a single block might not be effective as if it introduces a conflict to a "redundant" transaction then the adversary would need to fight against other branches that include that transaction. So adversary cannot just simply attack a single block it must attack all blocks that its conflicting transaction conflicts with. Hence, higher redundancy yields more expensive reorg. -- This is one of the things I've mentioned during our last chat that I wanted to highlight.}
 
 To make redundancy analyzable and tunable, we specify a simple \emph{verifiable random selection (VRS)}
 policy for transaction sampling:
@@ -543,7 +543,7 @@ extending two different tips, resulting in ``stalemated'' superchains. Honest
 transactions included in one branch never appear in the ledger of parties following
 the other branch (violating liveness, assuming no transaction redundancy), and a
 block confirmed in one branch can later be overturned by the other branch’s growth
-(violating persistence).
+(violating persistence).\mnote{To my understanding TB defines how many tips we can have concurrently but doesn't force to use all of them (force number of refs). So I don't see how this example with extending two different tips by two honest groups is addressed by TB. It's a split horizon case, but this would also require an adversary that is splitting the view of honest nodes. Otherwise, an honest node would need to include the other tip in his refs set and would merge both superchains. Right?}
 \end{proof}
 
 \paragraph{Remark: TB vs.\ DCP and Relation to Long-Delay Attacks.}

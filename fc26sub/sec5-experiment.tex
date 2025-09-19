@@ -4,10 +4,10 @@
 \section{Implementation and Evaluation}
 \label{sec:impl-eval}
 
-This section describes our prototype implementation and the empirical evaluation of \ProjBase. For background narratives and figures, see the documents titled “New Cryptarchia” and “Simulations New Cryptarchia.” The companion Jupyter notebook is referenced in those documents.
+This section describes empirical evaluation of \ProjBase. We have implemented a discrete-event simulator that we have used to compared \ProjBase to Ouroboros Praos from the perspective of reorg depth under increasing latency. Our implementation is simplistic and narrows down to simulating ledger growth and reorg depth assuming certain level of adversarial stake and network delay and chain parallelism level (allowed number of concurrent block producers).
 
 \subsection{Implementation Overview}
-We implemented a discrete-event simulator that models validators, network propagation, and the \ProjBase{} fork-choice. Each block stores
+We implemented a discrete-event simulator that models validators, network propagation, and the \ProjBase{} fork-choice. Each block stores \linebreak
 $(\id,\val,\slot,\txs,\refs,y,\pi,\sigma)$ as in Alg.~\ref{alg:block-creation}. References are maintained as adjacency lists of the ref-DAG; dependencies are checked against a UTXO set.
 
 The simulator exposes:
@@ -24,36 +24,52 @@ Unless stated otherwise, the default parameters are:
 \begin{center}
 \begin{tabular}{lcl}
 \toprule
-Broadcast delay mean & = & $0.5$ s\\
-Dissemination delay mean & = & $0.5$ s\\
-Blend hops & = & $3$\\
-Proof-of-leadership time & = & $1$ s\\
+Base network delay mean & = & $1.3$ s\\
 Reference window $w$ & = & $30$ slots\\
-Production amplification $f$ & = & $0.25$\\
 Adversary stake/control & = & $0.30$ \\
 Validators & = & $1000$ \\
 \bottomrule
 \end{tabular}
 \end{center}
 
-The network model combines “Blend”-style neighbor blending with per-hop dissemination; honest nodes use best-effort antichains given current visibility; transaction dependencies (UTXO conflicts) are enforced. In worst-case runs, the adversary is modeled as a single identity with perfect intra-adversary coordination and zero observation delay to the honest DAG; this constructs a conservative baseline.
+The network model assumes exponential distribution which mean is $1.3$s; honest nodes use best-effort antichains given current visibility; transaction dependencies (UTXO conflicts) are enforced. We assume the worst-case where the adversary is modeled as a single entity with perfect intra-adversary coordination and zero observation delay to the honest DAG; this constructs a conservative baseline.
 
 \subsection{Metrics}
 We track: (i) \textbf{reorg length} (depth of the deepest reverted block); (ii) \textbf{time to stabilization} (slots until last reorg across a horizon); (iii) \textbf{finality proxy} (age after which reorg probability $<10^{-k}$ for a fixed $k$); (iv) \textbf{short-ref density} (average $\wref$ per block); (v) \textbf{throughput proxy} (blocks per wall-clock time under the $f$ setting). %; and (vi) \textbf{concurrent tip count} (size of $\Tips(G)$ over time).
 
-\subsection{Results Summary}
-Across the benchmarks, our findings are:
-\begin{itemize}
-	\item \textbf{Stability under $30\%$ adversary.} The network consistently resists optimized reorg attempts; binned histograms of reorg lengths are time-equivalent to Cryptarchia v1 blocks.
-	\item \textbf{Quantitative comparison vs.\ Cryptarchia v1 (C1).} Under the most effective adversarial optimization tested (ILP-based, optimal sliding-window, exhaustive local), C1 produces roughly 15-block reorgs with frequency around $10^{-2}$, whereas \ProjBase{} produces 14--15-block reorgs with frequency around $1.5\times 10^{-5}$ (about $600\times$ improvement). For 10-block reorgs, C1 frequency is about $7\times 10^{-1}$ versus \ProjBase{} about $8\times 10^{-5}$ (about $8750\times$ improvement).
-	\item \textbf{ILP vs.\ global heuristic.} ILP-based optimization (exhaustive local within the window) yields longer rare reorgs but is computationally expensive; the global heuristic scales to many more attacks but exhibits shorter reorgs on average, aligning with its lesser optimization power.
-	\item \textbf{Effect of production rate $f$ (parallelism).} Increasing $f$ raises short-term instability but \emph{decreases} reorg length, leading to faster resolution: at $f{=}0.5$ (about $10\times$ C1), short forks are more frequent yet resolve quickly; at $f{=}0.15$ (about $3\times$ C1), behavior is more stable. Overall, higher information rate increases local variance but accelerates convergence.
-	\item \textbf{Stronger adversaries.} With $40$--$45\%$ adversarial control, \ProjBase{} maintains bounded reorgs and compares favorably to C1 under the same conditions.
-	\item \textbf{Near-majority and majority.} At $49\%$, the system degrades gracefully; at $\ge 51\%$ the attacker predictably dominates (as expected for a majority adversary), yet the induced distributions remain informative for parameterization and risk analysis.
-\end{itemize}
+\subsection{Block Parallelism}
+We control the parallelism of the block production by modifying the $f$ parameter. This enables us to increase the block production rate and relative to the base value.
+
+\begin{figure}
+\includegraphics[width=\textwidth]{figs/f-parallelism-bias.png}
+\caption{A relation between the value $f$, node stake and the probability of winning a slot.}
+\label{fig:f-parallelism-bias}
+\end{figure}
+
+The figure \ref{fig:f-parallelism-bias} presents a relation between the value $f$, node stake and the probability of winning a slot. We note that by increasing the $f$ parameter we give an advantage to the adversary by increasing its chance to win a slot higher than its stake should indicate. The advantage his higher when the adversary accumulates its stake in a single entity comparing to multiple entities.
+
+We have chosen to use this method due to its simplicity in our simulations as the overestimation of the adversary capabilities is acceptable. In future we will reduce this bias by introducing different mechanism for increasing block parallelism.
+
+\subsection{ILP vs.\ global heuristic}
+\begin{figure}
+\subfloat[ILP-based optimization]{\includegraphics[width=\textwidth/2]{figs/ILP.png}}
+\subfloat[Global heuristic optimization]{\includegraphics[width=\textwidth/2]{figs/Heuristic.png}}
+\caption{Comparison of the adversary optimization strategies ILP-based vs. global heuristic.}
+\label{fig:optimization}
+\end{figure}
+ILP-based optimization (exhaustive local within the window) yields longer rare reorgs but is computationally expensive; the global heuristic scales to many more attacks but exhibits shorter reorgs on average, aligning with its lesser optimization power (fig. \ref{fig:optimization}).
 
 \subsection{Parallelism vs.\ Reorg Length}
-Empirically we observe an inverse correlation between parallelism (higher $f$) and reorg length, especially visible in large-scale heuristic runs that permit substantially more attack attempts. While ILP-based local optima can surface rare long reorgs in small samples, the broader trend across $f\in\{0.25,0.3,0.35,0.4,0.5\}$ shows decreasing tail depth as $f$ increases, consistent with the “more votes, faster convergence” intuition underpinning the design.
+\begin{figure}
+\subfloat[5x parallelization with $f=0.25$]{\includegraphics[width=\textwidth/2]{figs/f-0.25.png}}
+\subfloat[6x parallelization with $f=0.30$]{\includegraphics[width=\textwidth/2]{figs/f-0.30.png}}\\
+\subfloat[7x parallelization with $f=0.35$]{\includegraphics[width=\textwidth/2]{figs/f-0.35.png}}
+\subfloat[8x parallelization with $f=0.40$]{\includegraphics[width=\textwidth/2]{figs/f-0.40.png}}\\
+\subfloat[10x parallelization with $f=0.50$]{\includegraphics[width=\textwidth]{figs/f-0.50.png}}
+\caption{Impact of the level of paralelization on the reorg depth for \ProjBase with 30\% of adversarial stake.}
+\label{fig:pralellization}
+\end{figure}
+Empirically we observe an inverse correlation between parallelism (higher $f$) and reorg length, especially visible in large-scale heuristic runs that permit substantially more attack attempts (fig. \ref{fig:pralellization}). While ILP-based local optima can surface rare long reorgs in small samples, the broader trend across $f\in\{0.25,0.3,0.35,0.4,0.5\}$ shows decreasing tail depth as $f$ increases, consistent with the “more votes, faster convergence” intuition underpinning the design.
 
 \subsection{Reorg Distributions vs.\ Stake and Latency}
 We next assess how the attacker’s capability (stake fraction and network control) affects the distribution of reorg depths and times. We vary $\alpha$ from $0.1$ to $0.49$ and test $\Delta$ values from $0.2$ s to $2$ s (holding other parameters fixed). For each setting, we simulate long runs (up to $10^6$ slots) to gather a distribution of reorg lengths and finalization times.
@@ -67,3 +83,12 @@ Holding $\alpha$ constant (say $0.3$), we increase network latency $\Delta$ rela
 \paragraph{Finality Time vs.\ Stake/Delay.}
 Using the finality proxy (age after which probability of reorg $<10^{-k}$), finality time remains on the order of tens of slots across the range of $\alpha$ tested, as long as $\alpha < 0.5$ and $w \ge \Delta$. For example, at $\alpha=0.3$, $\Delta=0.5$ s, $w=30$, we achieve $k=6$ within roughly $30$--$40$ slots. At $\alpha=0.45$, this increases to about $60$ slots for the same confidence level, reflecting slower convergence under heavier adversarial presence. The system consistently finalizes in $O(w)$ slots in secure regimes.
 
+\subsection{Results Summary}
+Across the benchmarks, our findings are:
+\begin{itemize}
+	\item \textbf{Stability under $30\%$ adversary.} The network consistently resists optimized reorg attempts; binned histograms of reorg lengths are time-equivalent to Praos blocks.
+	\item \textbf{Quantitative comparison vs.\ Praos.} Under the most effective adversarial optimization tested (ILP-based, optimal sliding-window, exhaustive local), Praos produces roughly 15-block reorgs with frequency around $10^{-2}$, whereas \ProjBase{} produces 14--15-block reorgs with frequency around $1.5\times 10^{-5}$ (about $600\times$ improvement). For 10-block reorgs, Praos frequency is about $7\times 10^{-1}$ versus \ProjBase{} about $8\times 10^{-5}$ (about $8750\times$ improvement).
+	\item \textbf{Effect of production rate $f$ (parallelism).} Increasing $f$ raises short-term instability but \emph{decreases} reorg length, leading to faster resolution: at $f{=}0.5$ (about $10\times$ Praos), short forks are more frequent yet resolve quickly; at $f{=}0.15$ (about $3\times$ Praos), behavior is more stable. Overall, higher information rate increases local variance but accelerates convergence.
+	\item \textbf{Stronger adversaries.} With $40$--$45\%$ adversarial control, \ProjBase{} maintains bounded reorgs and compares favorably to Praos under the same conditions.
+	\item \textbf{Near-majority and majority.} At $49\%$, the system degrades gracefully; at $\ge 51\%$ the attacker predictably dominates (as expected for a majority adversary), yet the induced distributions remain informative for parameterization and risk analysis.
+\end{itemize}
