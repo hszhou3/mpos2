@@ -56,6 +56,12 @@ We choose this method for its simplicity; the resulting overestimation of advers
 \end{figure}
 ILP-based optimization (exhaustive local within the window) yields rarer, longer reorgs but is computationally expensive. The global heuristic scales to many more attacks but produces shorter reorgs on average, consistent with its weaker optimization power (Fig.~\ref{fig:optimization}).
 
+\begin{figure}
+\includegraphics[width=\textwidth]{figs/Praos.png}
+\caption{Reorg depth sensitivity of the Ouroborous Praos with $f=0.05$. Black lines present individual chain reorgs depth.}
+\label{fig:praos}
+\end{figure}
+
 \subsection{Parallelism vs. Reorg Length}
 \begin{figure}
 \subfloat[5x parallelization, $f=0.25$]{\includegraphics[width=\textwidth/2]{figs/f-0.25.png}}
@@ -83,8 +89,8 @@ Empirically, higher parallelism (larger $f$) correlates with shorter reorgs, esp
 \subsection{Results Summary}
 Across benchmarks, we find:
 \begin{itemize}
-\item \textbf{Stability at 30\% adversary.} The network consistently resists optimized reorg attempts.%; binned histograms of reorg lengths are time-equivalent to Praos blocks.
-\item \textbf{Quantitative comparison to Praos.} Under the strongest adversarial optimization tested (ILP-based, optimal sliding window, exhaustive local), Praos produces roughly 15-block reorgs with frequency $\approx 10^{-2}$, whereas \ProjBase{} produces 14--15-block reorgs with frequency $\approx 1.5\times 10^{-5}$ ($\sim 600\times$ improvement). For 10-block reorgs, Praos is $\approx 7\times 10^{-1}$ vs. \ProjBase{} $\approx 8\times 10^{-5}$ ($\sim 8750\times$ improvement).
+\item \textbf{Stability at 30\% adversary.} The network consistently resists optimized reorg attempts; binned histograms of reorg lengths are time-equivalent to Praos blocks.
+\item \textbf{Quantitative comparison to Praos.} Under the strongest adversarial optimization tested (ILP-based, optimal sliding window, exhaustive local), Praos produces roughly 20-block reorgs with frequency $\approx 10^{-2}$ (Fig.~\ref{fig:praos}), whereas \ProjBase{} produces 14--15-block reorgs with frequency $\approx 1.5\times 10^{-5}$ ($\sim 600\times$ improvement). For 10-block reorgs, Praos is $\approx 7\times 10^{-1}$ vs. \ProjBase{} $\approx 8\times 10^{-5}$ ($\sim 8750\times$ improvement).
 \item \textbf{Effect of production rate $f$.} Increasing $f$ raises short-term instability but \emph{reduces} reorg length, accelerating resolution: at $f=0.50$ (about $10\times$ Praos), short forks occur more often yet resolve quickly; at $f=0.15$ (about $3\times$ Praos), behavior is calmer. A higher information rate increases local variance but speeds convergence.
 %\item \textbf{Stronger adversaries.} With $40$--$45\%$ adversarial control, \ProjBase{} maintains bounded reorgs and compares favorably to Praos under the same conditions.
 %\item \textbf{Near-majority and majority.} At $49\%$, the system degrades gracefully; at $\ge 51\%$, the attacker dominates (as expected), but the induced distributions remain informative for parameterization and risk analysis.
