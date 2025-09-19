@@ -1,6 +1,6 @@
 
 \section{Cryptareon-Ideal: Idealized Multi-Proposer Protocol}\label{sec:cryptareon-ideal}
-
+\label{sec:base}
 In this section, we present \emph{Cryptareon-Ideal}, an idealized multi-proposer consensus protocol. Cryptareon-Ideal allows multiple validators to propose blocks concurrently in each round, enhancing throughput and resilience against censorship. We describe the protocol’s proposer selection mechanism, fork-choice rule, and finalization logic, incorporating the reviewers’ suggestions for clarity and robustness. In particular, we introduce a \emph{preferred frontier} (a set of preferred tips) for chain selection, employ a public-coin for tie-breaking (to avoid adversary-controlled criteria), and use a public random eligibility model (dropping explicit stake fractions). All algorithms (Algorithms 1–5) are retained and updated accordingly. We also clarify the weight function used in fork choice, and we explicitly link the persistence depth $k$ to the finalization (persistence) property of the protocol.
 
 \subsection{Protocol Model and Proposer Selection}

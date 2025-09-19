@@ -1,0 +1,418 @@
+%!TEX root = mainMPOSv1.tex
+
+\newpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Section 3: Cryptareon-Ideal (NEW)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Cryptareon-Ideal: Idealized Multi-Proposer Protocol}
+\label{sec:ideal}
+Having introduced the DAG properties (DG, DQ, DCP, TB) and their connection to ledger properties in Section~\ref{sec:model}, we now turn to protocol design. The goal is to present an idealized multi-proposer DAG protocol whose behavior can be analyzed directly against these properties. By abstracting away practical constraints such as network delay, bounded references, and transaction conflicts, the idealized model isolates the core consensus dynamics. 
+%This allows us to prove that the protocol achieves DAG Growth, DAG Quality, DAG Common Past, and Tip Boundedness, and therefore satisfies Persistence and Liveness. These proofs then serve as the foundation for the more practical Cryptareon-Base protocol in Section~\ref{sec:base}.
+
+\subsection{Overview}
+\subsubsection{Assumptions}
+\label{subsec:ideal-overview}
+\ProjIdeal isolates the core consensus logic of a leaderless, multi-proposer DAG protocol to enable crisp arguments about safety and liveness. The model makes the following simplifying assumptions:
+\begin{itemize}
+  \item \textbf{Synchronous delivery:} time proceeds in slots; all honest messages broadcast in slot $s$ are delivered to all honest parties by the end of slot $s$ (zero-latency abstraction).
+%  \item \textbf{Public-coin eligibility:} each validator $v\in\Val$ independently becomes eligible in slot $s$ with probability $p\cdot\stakefrac{v}$ (a public-coin surrogate for VRF sortition).
+    \item \textbf{Public-coin eligibility.} 
+  Each validator $v$ is eligible in slot $s$ with probability $p$ \emph{independently of stake}. (Section~\ref{sec:base} realizes stake-proportional \emph{rates} via VRF sortition.) 
+  
+  \item \textbf{Unbounded referencing:} when eligible, an honest block may reference \emph{any} existing block(s). Honest creators attempt to cite \emph{all} currently visible tips (equivalently, a maximum antichain).%\footnote{Exact vs.\ greedy antichain selection is discussed; both are admissible in \ProjIdeal.}
+  \item \textbf{Bounded fork-choice window:} \emph{weight} used in fork choice counts only references created within a fixed \emph{window} of most recent slots (window length $w\ge1$). This prevents long-range withholding from dominating fork choice (\S\ref{subsec:ideal-window-justification}).
+  \item \textbf{No transaction conflicts:} to focus on consensus dynamics, we idealize away UTXO conflicts; each validator produces at most one block per slot by definition.
+\end{itemize}
+
+
+\subsubsection{Algorithms (for reference)}
+We recall the algorithms already presented:
+\begin{itemize}
+  \item \textbf{Alg.~\ref{alg:ideal-antichain}} (\emph{AntichainSelection}): compute a (maximum or greedy) antichain of the current DAG.
+  \item \textbf{Alg.~\ref{alg:ideal-create}} (\emph{Block Creation}): if eligible in slot $s$, build a block that references the selected antichain and broadcast it.
+  \item \textbf{Alg.~\ref{alg:ideal-reception}} (\emph{Block Reception}): integrate a valid incoming block; update $\Tips$ and fork-choice state.
+  \item \textbf{Alg.~\ref{alg:ideal-anchored-fc}} (\emph{Anchored Fork Choice}): score candidate tips by window-filtered reference weight anchored at $a$; pick the maximum.
+  \item \textbf{Alg.~\ref{alg:ideal-cca}} (\emph{Conflict Resolution via CCA}): for conflicting heads $i,j$, anchor at $c=\CCA(i,j)$ and compare window-filtered branch weights; choose the heavier branch.
+\end{itemize}
+
+\subsubsection{Protocol Walkthrough (Honest Player View)}
+\label{subsec:ideal-walkthrough}
+This subsection explains how an \emph{honest} validator executes \ProjIdeal in each slot, and how fork choice and conflict resolution interplay with block creation and reception.
+
+\paragraph{Per-slot loop (local state machine).}
+At the beginning of slot $s$, an honest player $P$ has local DAG $G_s=(V_s,E_s)$:
+\begin{enumerate}
+  \item \textbf{Eligibility check.} $P$ samples public coins for slot $s$ and determines eligibility with probability $p$. %$p\cdot\stakefrac{P}$.
+  \item \textbf{Reference selection (Alg.~\ref{alg:ideal-antichain}).} $P$ deterministically computes an antichain $A_s\subseteq V_s$. In \ProjIdeal, $A_s$ may include \emph{all} current tips since referencing is unbounded.
+  \item \textbf{Block creation (Alg.~\ref{alg:ideal-create}).} If eligible, $P$ constructs block $b_s=\langle \id,\val{=}P,\slot{=}s,\txs,\refs{=}A_s\rangle$ and broadcasts $b_s$.
+  \item \textbf{Block reception and integration (Alg.~\ref{alg:ideal-reception}).} Throughout the slot and by its end, $P$ receives all blocks broadcast in slot $s$. For each block $b$ not yet in $V_s$, $P$ verifies well-formedness and acyclicity, inserts $b$ and edges $(r\to b)$ for all $r\in\refs(b)$, updates $\Tips(G)$ and incremental reachability summaries, and triggers \ForkChoiceUpdate.
+  \item \textbf{Fork choice (Alg.~\ref{alg:ideal-anchored-fc}).} After integrating all blocks for slot $s$, $P$ runs anchored fork choice: for anchor $a$ (genesis or last finalized checkpoint), it computes window-filtered scores $W(T)$ for each $T\in\Tips(G)$ and sets the preferred frontier (set of non-conflicting tips) $\hat{T}_s$ to the maximizer. The \emph{ledger view} of $P$ at the end of slot $s$ is the linearization induced by the preferred branch to $\hat{T}_s$.
+  \item \textbf{Conflict resolution (Alg.~\ref{alg:ideal-cca}).} If two incomparable blocks $i,j$ imply conflicting ledger states above some ancestor, $P$ computes $c=\CCA(i,j)$ and compares window-filtered branch weights $\BranchW(i;c,w)$ vs.\ $\BranchW(j;c,w)$ to decide the winner. This rule is \emph{consistent} with the anchored fork choice: the preferred frontier (set of non-conflicting tips) must lie on the heavier branch as measured from their CCA.
+\end{enumerate}
+
+
+%\newpage
+
+\subsection{Protocol Details}
+
+\subsubsection{Notation and Objects}
+\label{subsec:ideal-notation}
+We reuse the global notation from Section~\ref{sec:model}. %Validators $\Val$ have stakes $\stake(v)>0$, total $\StakeTot=\sum_{v}\stake(v)$, share $\stakefrac{v} = \stake(v)/\StakeTot$. 
+Slots $\Slot\subseteq\mathbb{N}$ are totally ordered. Transactions $\Tx$ exist but have no constraints. Block identifiers $\Id$ are totally ordered by, e.g., lexicographic hash order $\preceq_{\mathrm{id}}$; we then extend to a total order on blocks by $(\slot,\id)$ lexicographically. For blocks $u,v$, write $u \prec v$ if either $\slot(u)<\slot(v)$ or they share slot and $\id(u)\prec_{\mathrm{id}}\id(v)$.
+
+A block is $b=\langle \id(b),\,\val(b),\,\slot(b),\,\txs(b),\,\refs(b)\rangle$. Here $\val(b)\in\Val$ and $\slot(b)\in\Slot$ denote its creator and slot; $\txs(b)\subseteq\Tx$ are its transactions; and $\refs(b)\subseteq\Id$ is a set of parent block identifiers (an antichain by construction). The reference-DAG is $G=(V,E)$ where $V$ is the set of all blocks, and $(r\to b)\in E$ iff $r\in \refs(b)$. We require $G$ to be acyclic. We write $x\leadsto y$ if there is a directed path from block $x$ to $y$. Define:
+\begin{equation*}
+\Anc(b)=\{a\in V: a\leadsto b\},\quad \Anc^*(b)=\Anc(b)\cup\{b\},
+\end{equation*}
+and 
+\begin{equation*}
+\Desc(b)=\{d\in V: b\leadsto d\},\quad \Desc^*(b)=\Desc(b)\cup\{b\}.
+\end{equation*}
+Blocks $u,v$ are incomparable, written $u\parallel v$, if neither $u\leadsto v$ nor $v\leadsto u$.
+
+\paragraph{Public-Coin Eligibility.} Fix a probability $p\in(0,1]$. In each slot $s$ and for each $v\in\Val$, we independently let $\Pr[\Eligibility(v,s)=1] = p$. 
+%$\cdot \stakefrac{v}$. (This simulates the VRF threshold.) 
+If $\Eligibility(v,s)=1$, validator $v$ creates a block.
+
+\paragraph{Tips.} The tip set $\Tips(G)$ of the DAG $G$ is the set of vertices with no descendants: $\Tips(G)=\{v\in V:\ \nexists\,u\in V \text{ with } v\to u\}$. More formally, 
+
+\begin{definition}[Tips]
+For a DAG $G=(V,E)$, $\Tips(G)\triangleq\{v\in V:\text{$v$ has out-degree $0$}\}$.
+\end{definition}
+
+\subsubsection*{Additional Definitions Used in this Section}
+
+\begin{definition}[Antichain; Maximal vs Maximum]
+$A\subseteq V$ is an antichain if all elements are pairwise incomparable in $G$. Maximal means inclusion-maximal; maximum means largest cardinality.
+\end{definition}
+\begin{definition}[\GreedyAntichain\ on $G_{s,w}$]
+Fix total order $\prec$ on vertices by $(\slot,\id)$. Scan vertices of $G_{s,w}$ in decreasing $\prec$, adding $v$ if $v$ is incomparable with all current elements; output is a \emph{maximal} antichain. All honest nodes use the same $\prec$; hence determinism.
+\end{definition}
+\begin{definition}[\OptionalLongRef]
+Given current slot $s$ and window $w$, optionally choose a single $\ell\notin G_{s,w}$ for connectivity: prefer the last finalized checkpoint if known; otherwise the $\prec$-max ancestor of $\min_{\prec}R$ with $\slot(\ell)\le s-w$. Long-refs never contribute to weight.
+\end{definition}
+\begin{definition}[\SampleMempool]
+Let $N_{\MCP}$ be the target number of parallel proposers per slot. Given seed $\rho$, include transaction $x$ iff 
+$H(\rho\|\mathrm{txid}(x))<\tfrac{1}{N_{\MCP}}\cdot 2^\kappa$, then filter to a maximal conflict-free subset.
+\end{definition}
+\begin{definition}[Closures on Sets]
+For $H\subseteq V$, $\Anc^*(H)\triangleq \bigcup_{h\in H}\Anc^*(h)$ and similarly for $\Desc^*(H)$.
+\end{definition}
+\begin{definition}[Conflict Predicate \Conflicts]
+Let $\Inputs(x)$ be the set of consumed UTXOs of transaction $x$. A set $T$ is conflict-free with respect to $H$ if (i) $\{\Inputs(x):x\in T\}$ are pairwise disjoint,
+(ii) $\Inputs(T)$ is disjoint from $\Inputs(\txs(\Anc^*(H)))$, and (iii) each $x\in T$ passes $\Valid(S,x)$, where $S$ is the state induced by $\Anc^*(H)$. Define $\Conflicts(T,H)$ to be true if $T$ is \emph{not} conflict-free w.r.t.\ $H$.
+\end{definition}
+
+%\begin{definition}[Contribution Function $\contrib$]
+%Let $\theta\in\{\mathsf{equal},\mathsf{stake}\}$ be a protocol parameter. Define $\contrib(d)=1$ if $\theta=\mathsf{equal}$ and $\contrib(d)=\stakefrac{\val(d)}$ if $\theta=\mathsf{stake}$.
+%\end{definition}
+
+\begin{definition}[\ForkChoiceUpdate]
+Maintain a cache comprising $\Tips(G)$, a per-validator latest-block map $L:\Val\to V\cup\{\bot\}$, and window reachability summaries sufficient to evaluate antichain tests and window-weight sums.
+\end{definition}
+\begin{definition}[\Broadcast]
+We assume authenticated broadcast: any message sent by an honest party is delivered to every honest party within $\Delta$ slots after GST.
+\end{definition}
+\begin{definition}[Anchor Selection for Fork-Choice]
+Let $a$ be the last finalized checkpoint if one exists; otherwise the earliest block whose slot $\le s-w$ on the preferred branch, else genesis.
+\end{definition}
+
+%\subsubsection{Idealized Antichain Selection and Block Creation}
+%In \ProjIdeal, when a validator $v$ is eligible at slot $s$, it samples transactions and references all current tips (or equivalently, all blocks in a maximum antichain). The following algorithm captures this:
+
+
+\subsubsection{Idealized Antichain Selection and Block Creation}
+We allow either a greedy or exact (Dilworth-based) antichain selection. Once eligible in slot $s$, a validator references
+the selected antichain and broadcasts a block carrying a public-coin label $y(b)\in[0,1)$ used \emph{only} for tie-breaking in Section~\ref{sec:ideal}. 
+
+
+
+\begin{algorithm}[H]
+\caption{\AntichainSelection (Idealized)}
+\label{alg:ideal-antichain}
+\begin{algorithmic}[1]
+\Require Global DAG $G=(V,E)$
+\Ensure Antichain $A\subseteq V$
+\State $A \gets \ExactMaxAntichain(G)$ \Comment{or use \GreedyAntichain deterministically}
+\State \Return $A$
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}[H]
+\caption{Block Creation (Idealized, per validator $v$ at slot $s$)}
+\label{alg:ideal-create}
+\begin{algorithmic}[1]
+\Require Global DAG $G=(V,E)$, validator $v$, slot $s$
+\If{$\Eligibility(v,s)=1$}
+  \State $T \gets \SampleMempool()$ \Comment{Sample transactions (no conflicts assumed)}
+  \State $A \gets \AntichainSelection(G)$
+  \State $b \gets \langle \id,\,\val=v,\,\slot=s,\,\txs=T,\,\refs=A\rangle$
+  \State Insert $b$ and edges $(r\to b)$ for $r\in A$ into $G$
+  \State \Broadcast($b$) \Comment{Broadcast block}
+\EndIf
+\end{algorithmic}
+\end{algorithm}
+
+
+\subsubsection{Idealized Block Reception}
+Upon receiving a block $b\notin V$, the node checks acyclicity and parent presence, inserts edges $(r\to b)$ for $r\in \refs(b)$,
+updates tips and reachability summaries, and then updates fork-choice state.
+
+
+
+\begin{algorithm}[H]
+\caption{Block Reception (Idealized)}
+\label{alg:ideal-reception}
+\begin{algorithmic}[1]
+\Require Incoming block $b$, reference-DAG $G=(V,E)$
+\Ensure $b$ is accepted into $G$ or deferred/rejected
+\If{$b\in V$} \Return \EndIf
+\If{$\exists r\in \refs(b)$ such that $r\notin V$}
+  \State Request missing parents $r$; enqueue $b$; \Return
+\EndIf
+\If{$\exists r\in \refs(b)$ such that $r \in \Desc^*(b)$} \textbf{reject} $b$ \EndIf
+\State Insert $b$ into $G$: add vertex and edges $(r\to b)$ for $r\in\refs(b)$
+\State Update $\Tips(G)$ and reachability summaries
+\State \ForkChoiceUpdate($G$) \Comment{Update fork-choice state}
+\State \Broadcast($b$)
+\end{algorithmic}
+\end{algorithm}
+
+
+
+
+
+
+\subsubsection{Fork Choice (Idealized)}
+\label{subsec:alg4}
+
+We use a CCA-anchored, window-filtered weight metric. Fix a window parameter $w\ge1$. For any block $d$, define
+\begin{equation*}
+\wref(d;w) \;=\; \bigl|\{r\in \refs(d):\,\slot(d)-\slot(r) < w\}\bigr|
+\end{equation*}
+(the number of references within $w$ slots). 
+
+\paragraph{Anchored Fork Choice.} Given an anchor block $a$ (e.g., genesis) and a tip $T$, define its score
+\begin{equation*}
+W(T)\;=\;\sum_{\substack{d\in\Desc^*(T)\\a\leadsto d}} \wref(d;w).
+\end{equation*}
+We select the tip $\hat{T}$ with maximum score (breaking ties by the deterministic order $\prec$):
+
+\iffalse
+\begin{algorithm}[H]
+\caption{Anchored Fork Choice (Idealized)}
+\label{alg:ideal-anchored-fc}
+\begin{algorithmic}[1]
+\Require Anchor $a\in V$, candidate tips $\mathcal{T}\subseteq \Tips(G)$, window $w$
+\Ensure Selected tip $\hat{T}$
+\State $\hat{T}\gets \bot, \hat{W}\gets -\infty$
+\ForAll{$T \in \mathcal{T}$}
+  \State $W(T)\gets\sum_{\substack{d\in\Desc^*(T)\\a\leadsto d}} \wref(d;w)$
+  \If{$W(T)>\hat{W}$ \textbf{or} ($W(T)=\hat{W}$ and $T\prec \hat{T}$)}
+    \State $\hat{T}\gets T,\ \hat{W}\gets W(T)$
+  \EndIf
+\EndFor
+\State \Return $\hat{T}$
+\end{algorithmic}
+\end{algorithm}
+
+\paragraph{Conflict Resolution via CCA.} For two conflicting blocks $i$ and $j$, let 
+\begin{equation*}
+\CA(i,j)=\Anc^*(i)\cap \Anc^*(j),\qquad
+\CCA(i,j)=\arg\max_{c\in \CA(i,j)}(\slot(c),\id(c))
+\end{equation*}
+with ties broken by $\id$. Let $c=\CCA(i,j)$. Define the branch weight from $c$:
+\begin{equation*}
+\BranchW(x; c, w) = \sum_{\substack{d\in V:\\ x\leadsto d,\ c\leadsto d}} \wref(d;w),\quad x\in\{i,j\}.
+\end{equation*}
+We choose the branch head $h^*\in\{i,j\}$ with larger weight:
+
+\begin{algorithm}[H]
+\caption{Conflict Resolution (Idealized)}
+\label{alg:ideal-cca}
+\begin{algorithmic}[1]
+\Require Conflicting blocks $i,j$, window $w$
+\Ensure Winning block $h^*$
+\State $c \gets \CCA(i,j)$
+\State $W_i\gets\BranchW(i;c,w)$, \quad $W_j\gets\BranchW(j;c,w)$
+\If{$W_i > W_j$} \Return $i$
+\ElsIf{$W_j > W_i$} \Return $j$
+\Else \Return $\min\nolimits_{\prec}\{i,j\}$ \Comment{deterministic tie-break}
+\EndIf
+\end{algorithmic}
+\end{algorithm}
+
+
+\fi
+
+%\subsubsection{Fork Choice (Idealized) — Algorithm 4}
+\medskip
+
+We anchor at a fixed block $a$ (e.g., genesis or last finalized checkpoint). For each tip $T\in\Tips(G)$ we compute a window-filtered
+weight $W(T)$ (descendant short-reference count anchored at $a$). The output is a \emph{preferred frontier} $\widehat{\mathcal T}\subseteq\Tips(G)$,
+a non-conflicting set of maximizers. 
+
+\begin{algorithm}[H]
+\caption{\textsc{AnchoredForkChoice} (Idealized)}\label{alg:afc-ideal}
+\label{alg:ideal-anchored-fc}
+
+\textbf{Input:} Anchor $a$, current $G$, window $w$\\
+\textbf{Output:} Preferred frontier $\widehat{\mathcal T}\subseteq\Tips(G)$ (pairwise non-conflicting) 
+\begin{algorithmic}[1]
+\State $\widehat{\mathcal T} \leftarrow \emptyset$; $\widehat{W} \leftarrow 0$ \hfill  (initialize to 0, not -inf)
+\For{each $d\in V$ with $a\leadsto d$}
+  \State $score(d)\leftarrow 0$
+\EndFor
+\For{each $d\in V$ with $a\leadsto d$}
+  \State $score(d) \gets score(d) + \sum_{r\in\refsin(d)} 1$
+  \State $score(d) \gets score(d) + score(\textsf{parent}(d))$ \hfill \textit{(DP over the DAG)}
+\EndFor
+\State Compute $W(T)\gets score(T)$ for all $T\in\Tips(G)$
+\State $\mathcal U \gets \{T\in\Tips(G): W(T)=\max_{T'} W(T')\}$
+\State $\widehat{\mathcal T} \gets$ a maximal non-conflicting subset of $\mathcal U$ chosen by $\prec$; break residual ties by smallest $y(T)$ 
+
+\State \textbf{return} $\widehat{\mathcal T}$
+\end{algorithmic}
+\end{algorithm}
+
+\paragraph{Tie-break remark.} 
+In the ideal model we attach an independent public-coin label $y(\cdot)$ to blocks solely for tie-breaks, avoiding id/content-based grinding.
+Section~\ref{sec:base} instantiates $y(\cdot)$ with the VRF output.
+
+\subsubsection{Conflict Resolution via CCA}
+\label{subsec:alg5}
+Given conflicting heads $i,j$, let $c=\CCA(i,j)$ be their closest common ancestor. We compare the window-filtered branch weights from $c$ onward.
+If equal, we use the smallest public-coin label for tie-break. 
+
+\begin{algorithm}[H]
+\caption{\textsc{ConflictResolution} (Idealized)}\label{alg:cca-ideal}
+\label{alg:ideal-cca}
+
+\textbf{Input:} Conflicting blocks $i,j$, window $w$\\
+\textbf{Output:} Winner $h^\star$
+\begin{algorithmic}[1]
+\State $c \leftarrow \arg\max_{x\in CA(i,j)} \big(\mathrm{slot}(x),\, y(x)\big)$ \hfill \textit{(slot, then public-coin label)} 
+\State $W_i \leftarrow \BranchW(i; c, w)$;\quad $W_j \leftarrow \BranchW(j; c, w)$
+\If{$W_i > W_j$} \State \textbf{return} $i$
+\ElsIf{$W_j > W_i$} \State \textbf{return} $j$
+\Else \State \textbf{return} $\arg\min_{x\in\{i,j\}} y(x)$ \hfill \textit{(tie-break by smallest public-coin label)} 
+\EndIf
+\end{algorithmic}
+\end{algorithm}
+
+\paragraph{Rationale.} 
+Using $y(\cdot)$ prevents adversarial control via transaction ordering or content hashing; it is a stand-in for the VRF output in the practical protocol.
+
+
+
+
+\paragraph{Finalization rule (informal).}
+In \ProjIdeal, blocks become \emph{finalized} purely through the fork-choice dynamics,
+without requiring any separate BFT-style gadget.
+Specifically, an honest party may treat a block as final once it is
+$k$-deep under the current 
+preferred frontier (set of non-conflicting tips), 
+for a parameter
+$k=k(w,\epsilon)$ established in the safety analysis
+(\S\ref{subsec:ideal-ledger-props}).
+Intuitively, once a block has accumulated sufficient window-filtered weight,
+any conflicting branch beyond the relevant CCA cannot overtake it,
+since adversarial work created outside the last $w$ slots has no effect.
+
+\begin{remark}[Comparison with BFT-style finality]
+Traditional BFT-based protocols (e.g., HotStuff, Casper FFG) achieve finality
+through explicit voting and quorum certificates.
+In contrast, our design provides \emph{probabilistic finality} directly from
+the weight-based fork-choice and bounded-window analysis:
+a block becomes irreversible once its depth ensures an honest margin
+that no adversary with $\alpha < 1/2$ stake can overcome.
+Thus, finality emerges organically from the ledger’s growth properties,
+without any auxiliary consensus layer.
+\end{remark}
+
+
+
+
+
+
+
+\subsection{On Unbounded Referencing vs.\ Bounded Fork Choice}
+\label{subsec:ideal-window-justification}
+\ProjIdeal allows \emph{unbounded referencing}: an honest block may cite \emph{all} existing tips (or a maximum antichain), which accelerates convergence and directly implies Tip Boundedness (TB) in the synchronous ideal.
+However, using \emph{unbounded} weight in fork choice (i.e., counting all references since genesis) is unsafe even in a synchronous model because an adversary can \emph{withhold} a private subtree for many slots and then reveal it at once. The revealed descendants would contribute large cumulative score to an adversarial branch, potentially overriding the honest branch despite minority stake.
+
+\begin{lemma}[Unsafe infinite-horizon weight]
+Even under synchrony and honest majority, if fork choice scores branches by \emph{unbounded} descendant counts since genesis, there exists a withholding strategy that can cause arbitrarily deep reversions with non-negligible probability.
+\end{lemma}
+
+\begin{proof}[Proof sketch]
+Let the adversary with stake fraction $\alpha<1/2$ privately build a subtree extending from a recent CCA while the honest parties continue extending the public branch. After $L$ slots, the private subtree accumulates $\Theta(\alpha L)$ references while the honest branch accumulates $\Theta((1-\alpha)L)$. If the scoring aggregates from genesis, the adversary can time its release to coincide with honest fragmentation at the frontier (many tips), so the adversarial branch appears heavier due to concentrated weight. Since contributions are not window-limited, the \emph{entire} private accumulation applies, enabling deep reorgs. Window-filtering neutralizes this leverage by discarding stale contributions outside the last $w$ slots.
+\end{proof}
+
+\noindent\textbf{Conclusion.} In \ProjIdeal we \emph{retain unbounded referencing} (for rapid merging and TB), but we \emph{require a bounded window $w$ in the fork-choice metric}. This pairing preserves fast convergence while preventing long-range weight accumulation from withheld blocks.
+
+\subsection{Security of the Idealized Protocol}
+\label{subsec:ideal-security}
+We now prove that \ProjIdeal satisfies the DAG properties (DG, DQ, DCP, TB) and, consequently, \emph{ledger persistence (safety)} and \emph{liveness}. Throughout, let the honest stake fraction be $H\in(1/2,1]$ and let $p\in(0,1]$ be the per-slot eligibility rate (public-coin). All statements hold \emph{except with negligible probability} in the security parameter $\lambda$ (via Chernoff-type bounds).
+
+
+\subsubsection{Consensus Properties}
+
+\paragraph{Preliminaries.} %In slot $s$, the number of honest eligible validators is $\mathrm{Hon}_s\sim \mathrm{Binomial}(|\Val|,\,p\cdot \mathbb{E}[\stakefrac{v}\,|\,v\text{ honest}])$, with expectation $\Theta(pH|\Val|)$. 
+Under synchrony and unbounded referencing, all blocks created in slot $s$ can reference \emph{all tips visible at the start of the slot}, and all honest parties receive the same set of blocks by the end of the slot.
+
+\begin{theorem}[DAG Growth (DG) in \ProjIdeal]
+\label{thm:ideal-DG}
+Fix any interval of $\ell$ slots after GST. With probability $1-\negl(\lambda)$, at least $\tau_D\ell$ honest blocks are created and become ancestors of some honest tip by the end of the interval, for $\tau_D=\Theta(pH)$.
+\end{theorem}
+\begin{proof}[Proof sketch]
+Linearity and Chernoff concentration on $\sum_{s} \mathrm{Hon}_s$ give $\Theta(pH\ell)$ honest blocks in the interval. Under synchrony, each of these blocks is referenced by subsequent honest blocks in the next slot, hence becomes an ancestor of an honest tip. 
+\end{proof}
+
+\begin{theorem}[DAG Quality (DQ) in \ProjIdeal]
+\label{thm:ideal-DQ}
+For any $\ell$-slot window after GST, the fraction of honest blocks entering the preferred frontier is at least $\mu_D=\Theta(H)$ with probability $1-\negl(\lambda)$.
+\end{theorem}
+\begin{proof}[Proof sketch]
+Eligibility is stake-proportional and independent across validators; thus the expected honest fraction per slot is $H$. Since fork-choice is deterministic and anchored, the selection process does not bias adversarial blocks upwards; Chernoff bounds imply concentration around $H$ over $\ell$ slots.
+\end{proof}
+
+\begin{theorem}[Tip Boundedness (TB) in \ProjIdeal]
+\label{thm:ideal-TB}
+With unbounded referencing and synchrony, $\mathrm{TB}[\beta]$ holds with $\beta=O(p\,|\Val|)$.
+\end{theorem}
+\begin{proof}[Proof sketch]
+At most $O(p\,|\Val|)$ honest blocks are created in a slot; each of them references \emph{all} pre-existing tips, so all prior tips are buried and removed from $\Tips(G)$. Thus the tip set after each slot is bounded by the number of new blocks created in that slot.
+\end{proof}
+
+\begin{theorem}[DAG Common Past (DCP) in \ProjIdeal]
+\label{thm:ideal-DCP}
+There exists $k_D=O(1)$ such that removing the last $k_D$ layers beneath each honest party's preferred tip yields identical ancestor sets, with probability $1-\negl(\lambda)$.
+\end{theorem}
+\begin{proof}[Proof sketch]
+Synchrony implies identical views at the end of each slot. By TB, the frontier width is $O(1)$ (in expectation and with exponential tails). Because honest blocks in slot $s{+}1$ reference all tips from slot $s$, any divergence confined to the last $O(1)$ layers is reconciled in one step. Hence $k_D=O(1)$ suffices.
+\end{proof}
+
+\subsubsection{Ledger Properties (Persistence and Liveness)}
+\label{subsec:ideal-ledger-props}
+We now show that \ProjIdeal's anchored, window-filtered fork choice, coupled with CCA-based conflict resolution, yields ledger safety and liveness.
+
+\begin{theorem}[Persistence (Safety) of \ProjIdeal]
+\label{thm:ideal-safety}
+There exists $k=k(w,\epsilon)$ such that if a block $B$ is $k$-deep under the preferred tip of an honest party at the end of some slot, then with probability $1-\negl(\lambda)$, $B$ remains in the ledger of all honest parties at all future times (no conflicting ledger can supersede it).
+\end{theorem}
+\begin{proof}[Proof sketch]
+Consider any conflicting branch revealed later whose head $j$ competes against the honest head $i$ after their CCA $c=\CCA(i,j)$. By DG, DQ, and TB, the honest branch accumulates $\Omega(w)$ window-filtered references in the next $w$ slots. Since fork choice counts only the last $w$ slots anchored at $c$, any adversarial references created \emph{more than $w$ slots} ago (e.g., withheld) contribute zero score. Thus, once the honest branch leads by a margin growing with $w$, the adversary cannot overturn it without controlling $\ge 1/2$ of stake \emph{within the window}. Choosing $k=\Theta(w)$ ensures this margin has formed \emph{before} $B$ is declared final, yielding persistence.
+\end{proof}
+
+\begin{theorem}[Liveness of \ProjIdeal]
+\label{thm:ideal-liveness}
+For any valid transaction $\tx$ broadcast by an honest party after GST, there exists $\ell_{\mathrm{live}}=\mathrm{poly}(1/p,1/H)$ such that $\tx$ appears in the ledger of every honest party within $\ell_{\mathrm{live}}$ slots, except with negligible probability.
+\end{theorem}
+\begin{proof}[Proof sketch]
+In each slot, with constant probability at least one honest validator is eligible; upon eligibility, the validator can include $\tx$. Under synchrony and unbounded referencing, subsequent honest blocks reference the block containing $\tx$ and quickly bury it. Using DG, DQ, and TB, the block's descendant count grows linearly over time, and the window-filtered fork choice maintains the branch as preferred, so $\tx$ enters all honest ledgers within $O(\log(1/\negl))$ slots; optimizing constants yields $\ell_{\mathrm{live}}=\tilde{O}(1/(pH))$.
+\end{proof}
+
+
+
+
