@@ -22,7 +22,6 @@ To keep the protocol lean and its analysis transparent, we fix the following dis
   \item \textbf{Eligibility.} VRF sortition is domain-separated per slot/chain; only unpredictability and uniqueness are assumed here.
   \item \textbf{Finality depth.} We use the rule “$k$-deep $\Rightarrow$ stable” with $k=\Theta(w)$; constants follow from the proofs in this section.
 \end{itemize}
-\label{sec:base}
 
 
 
@@ -277,12 +276,14 @@ We prove the DAG properties and ledger properties for \ProjBase under~\eqref{eq:
 
 
 \subsubsection{Consensus properties: DG, DQ, TB, DCP}
-\begin{theorem}[Consensus properties of \ProjBase]\label{thm:base-consensus-summary}
-Under the parameter discipline $w \ge \Delta + \omega(\log \lambda)$ and $H>1/2+\varepsilon$,
-\ProjBase{} satisfies DG, DQ, TB, and DCP after GST with constant parameters (in~$\lambda$).
-Formal statements and proofs are given in Appendix~\ref{app:base-security}.
-\end{theorem}
 
+%\begin{theorem}[Consensus properties of \ProjBase]\label{thm:base-consensus-summary}
+%Under the parameter discipline $w \ge \Delta + \omega(\log \lambda)$ and $H>1/2+\varepsilon$,
+%\ProjBase{} satisfies DG, DQ, TB, and DCP after GST with constant parameters (in~$\lambda$).
+%Formal statements and proofs are given in Appendix~\ref{app:base-security}.
+%\end{theorem}
+
+We now show  the consensus properties, DG, DQ, TB, and DCP, can be achieved, as stated in Theorem~\ref{thm:base-consensus-summary}. 
 
 \begin{theorem}[DAG Growth (DG) in \ProjBase]
 \label{thm:base-DG}
@@ -318,6 +319,11 @@ By TB, the honest frontier has bounded width $O(\lambda_h\Delta)$. After $\Delta
 
 
 \subsubsection{Ledger properties: Persistence and Liveness}
+\
+
+We now show ledger properties can be achieved as stated in Theorem~\ref{thm:base-ledger-summary}. 
+
+
 \begin{theorem}[Persistence (Safety) of \ProjBase]
 \label{thm:base-safety}
 Let $k=\Theta(w)$ be chosen so that in $w$ slots the honest branch accumulates a fixed constant margin of window-filtered weight against any competing branch past the same CCA. If a block $B$ is $k$-deep under an honest party's preferred frontier at time $t$, then with probability $1-\negl(\lambda)$, $B$ remains in every honest party's ledger at all later times.

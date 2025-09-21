@@ -290,7 +290,7 @@ VRF eligibility is stake-proportional; the expected honest fraction per slot is 
 
 \begin{theorem}[Tip Boundedness (TB) in \ProjBase]
 \label{thm:base-TB}
-Assume $w\ge \Delta$. Then $\mathrm{TB}[\beta]$ holds with $\beta=O(\lambda_h\cdot \Delta)$ w.h.p.
+Assume $w\ge \Delta$ and let $\lambda_h=\mathbb{E}[\#\text{honest-eligible per slot}]$. Then $\mathrm{TB}[\beta]$ holds with $\beta=O(\lambda_h\cdot \Delta)$ w.h.p. Then $\mathrm{TB}[\beta]$ holds with $\beta=O(\lambda_h\cdot \Delta)$ w.h.p.
 \end{theorem}
 \begin{proof}[Proof sketch]
 Within any $\Delta$-slot horizon, honest blocks produced without mutual visibility may introduce multiple tips. After at most $\Delta$ slots these blocks are delivered and subsequent honest blocks (in slots $>s{+}\Delta$) reference \emph{all} visible recent tips within the window, merging them. Hence the tip set size is stochastically dominated by the number of honest blocks created within the last $\Delta$ slots, i.e., $O(\lambda_h\Delta)$, up to lower-order adversarial contributions that are also merged once visible.
