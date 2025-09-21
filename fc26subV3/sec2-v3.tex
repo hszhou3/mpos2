@@ -5,9 +5,11 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %\newpage
+\vspace{-.3cm}
 
 \section{Preliminaries} 
 \label{sec:prelim}
+\vspace{-.3cm}
 
 
 % --- THIS PART IS NEW: notation at-a-glance ---
@@ -31,6 +33,7 @@ $\contrib(d)$ & per-block contribution weight (default $1$; optionally stake-wei
 
 
 % --- END NEW ---
+\vspace{-1cm}
 
 \subsection{Security Model and Protocol Basics} 
 \label{sec:model}
@@ -70,6 +73,7 @@ The validator must ensure $\txs(b)$ is conflict-free (no double-spends) relative
 
 We recall the canonical properties for chain protocols~\cite{EC:GarKiaLeo15}: {\em Common Prefix (CP[$k$])} ensures any two honest chains differ only in the last $k$ blocks; {\em Chain Growth (CG[$\tau,\ell$])} guarantees any honest chain grows by at least $\tau\ell$ blocks over any $\ell$-slot window; and {\em Chain Quality (CQ[$\mu,\ell$])} ensures that in any $\ell$ consecutive blocks of an honest chain, at least a $\mu$ fraction are from honest parties. These imply persistence and liveness for classical blockchains~\cite{EC:GarKiaLeo15}.
 For DAG-based protocols, we define analogous properties. 
+Due to space limit, many technical discussions and illustrations about the definitions have be moved to Appendix~\ref{app:DG-DQ-DCP}. 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%
 \ignore{%%%%%
@@ -106,12 +110,14 @@ blue = frontier region; gray = common past; red = broadcast transaction event or
 
 }%%%%%%%%%
 
+\vspace{-.3cm}
 
 \subsubsection{DAG Growth (DG)}
 \label{sec:DG}
 
 In any window of $\ell$ slots after GST, honest work makes \emph{linear progress along some honest chain} in the DAG: at least $\tau_D\cdot \ell$ honest blocks created in that window end up on the past of an honest party’s fork-choice tip (i.e., on its preferred branch).
-Please also see Figure~\ref{fig:dg} in Appendix~\ref{app:DG} for illustration of the idea. 
+See Figure~\ref{fig:dg} in Appendix~\ref{app:DG} for illustration of the idea. 
+Technical discussions can also be found in Appendix~\ref{app:DG}. 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%
 \ignore{%%%%%
@@ -159,7 +165,6 @@ We say $\mathrm{DG}[\tau_D,\ell]$ holds if for all such intervals
 \]
 \end{definition}
 
-Please see Appendix~\ref{app:DG} for more technical discussions about this definition. 
 
 
 \ignore{%%%%%%%%%%%%%%%%%%%%%
@@ -199,6 +204,7 @@ only in presentation; DG-Lin aligns more directly with the DAG’s parallel natu
 
 }%%%%%%%%%%%%%%%
 
+\vspace{-.3cm}
 
 \subsubsection{DAG Quality (DQ)} 
 \label{sec:DQ}
@@ -271,7 +277,7 @@ Fix $k_D \in \mathbb{N}$. For an honest party $P$ at slot $t$, let $V_t^P$ denot
 its view of the DAG at the end of $t$, and define
 $\mathsf{Trim}(V_t^P,k_D)$ as $V_t^P$ with the last $k_D$ layers (by slots)
 beneath its fork-choice tip removed.
-
+ %
 We say $\mathrm{DCP}[k_D]$ holds if for all honest parties $P,Q$ and all slots
 $t_1 \le t_2$ after $\mathrm{GST}$,
 \[
@@ -341,12 +347,11 @@ with probability $1-\negl(\lambda)$.}
 }%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-
+\ignore{%%%%%%%%%
 \begin{remark}[Consistency of DAG properties]
 Definitions~\ref{def:DG} (DAG Growth),~\ref{def:DQ} (DAG Quality), and~\ref{def:DCP} (DAG Common Past) are all stated relative to an honest party’s fork-choice tip and its preferred branch. This ensures consistency across the properties: \emph{DG} guarantees linear progress on some honest preferred chain, \emph{DQ} guarantees that honest blocks dominate the frontier of that chain, and \emph{DCP} guarantees that honest parties’ preferred branches agree on a long common past. Together, these properties provide a coherent DAG analogue of the chain-growth, chain-quality, and common-prefix properties from backbone analyses.
 \end{remark}
-
-
+}%%%%%%%%%%%%%%
 
 %\newpage
 \subsection{Ledger Security Properties}
@@ -407,15 +412,17 @@ where $n=|L_{t_1}^P|$. That is, all but the last $k$ transactions in $P$'s ledge
 at time $t_1$ are immutable and appear in $Q$'s ledger at time $t_2$.
 \end{definition}
 
+\ignore{%%%
 \begin{remark}[On DAG Growth and Persistence]
 The proof of persistence later in Sections~3.4.2 and~4.3.2 relies on DG 
 to guarantee that honest blocks accumulate at a linear rate \emph{along honest preferred branches}. 
 This ensures that once a block is $k$-deep under a fork-choice tip, the honest margin behind it 
 grows steadily, preventing adversarial branches from overturning it. 
 \end{remark}
+}%%%%%
 
 
-
+\vspace{-.3cm}
 
 \subsubsection{Liveness}
 \label{sec:liveness}
@@ -424,7 +431,8 @@ grows steadily, preventing adversarial branches from overturning it.
 A protocol has \emph{liveness} with parameter $\ell_{\mathrm{live}}$ if for any valid transaction broadcast continuously by an honest party,
 the transaction appears in the ledger of every honest party within $\ell_{\mathrm{live}}$ slots after $\mathrm{GST}$,
 except with probability $\negl(\lambda)$.
-Please also see Figure~\ref{fig:liveness} in Appendix~\ref{app:liveness} for illustration of the idea. 
+See Figure~\ref{fig:liveness} in Appendix~\ref{app:liveness} for illustration of the idea. 
+Extended discussions can be found in Appendix~\ref{app:liveness}. % for more technical discussions about this definition. 
 
 
 \ignore{%%%%%%%%%
@@ -475,7 +483,6 @@ except with negligible probability.
 \end{definition}
 
 
-Extended discussions can be found in Appendix~\ref{app:liveness}. % for more technical discussions about this definition. 
 
 
 \ignore{%%%%%%%%%%%%%%%%%%%%%
@@ -506,6 +513,7 @@ Long illustrative scenarios are deferred to an appendix in the full version.
 }%%%%%%%%%%%
 
 
+\vspace{-.3cm}
 
 \subsection{Tip Boundedness and Its Necessity}
 \label{subsec:tip-boundedness}
@@ -523,6 +531,7 @@ another) is at most $\beta$, except with negligible probability. Here $\beta$ is
 $O(\Delta \cdot \text{block rate})$, i.e., proportional to the maximum number of
 honest blocks that can be created during the delay window $\Delta$.
 \end{definition}
+\vspace{-.3cm}
 
 \paragraph{Why TB.}
 TB caps the number of concurrent honest tips, preventing indefinite fragmentation.

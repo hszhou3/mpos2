@@ -329,7 +329,8 @@ at time $t_1$ are immutable and appear in $Q$'s ledger at time $t_2$.
 \end{definition}
 
 \begin{remark}[On DAG Growth and Persistence]
-The proof of persistence later in Sections~3.4.2 and~4.3.2 relies on DG 
+The proof of persistence % later in Sections~3.4.2 and~4.3.2 
+relies on DG 
 to guarantee that honest blocks accumulate at a linear rate \emph{along honest preferred branches}. 
 This ensures that once a block is $k$-deep under a fork-choice tip, the honest margin behind it 
 grows steadily, preventing adversarial branches from overturning it. 
@@ -421,7 +422,8 @@ Long illustrative scenarios are deferred to an appendix in the full version.
 
 
 \subsection{Tip Boundedness and Its Necessity}%\n
-\label{subsec:tip-boundedness}
+\label{app:tip-boundedness}
+\label{app:TB}
 
 The preceding properties (DAG Growth, DAG Quality, DAG Common Past) capture
 progress, fairness, and eventual agreement on history. However, these three
@@ -511,7 +513,4 @@ This parallels the \emph{long-delay attack} described by Pass, Seeman, and shela
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\noindent\textbf{Why Tip Boundedness (TB) up front.} 
-DG/DQ/DCP ensure progress, fairness, and a shared past, but without a bound on concurrent honest tips the system can fragment, 
-slowing merge pressure and delaying convergence of window-filtered scores. TB asserts $|\Tips(G)|\le \beta = O(\Delta\cdot\text{rate})$ after GST, 
-which in turn makes the anchored fork-choice stabilize once tips become mutually visible.
+%\noindent\textbf{Why Tip Boundedness (TB) up front.}  DG/DQ/DCP ensure progress, fairness, and a shared past, but without a bound on concurrent honest tips the system can fragment,  slowing merge pressure and delaying convergence of window-filtered scores. TB asserts $|\Tips(G)|\le \beta = O(\Delta\cdot\text{rate})$ after GST, which in turn makes the anchored fork-choice stabilize once tips become mutually visible.
