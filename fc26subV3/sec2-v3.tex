@@ -14,6 +14,9 @@
 
 % --- THIS PART IS NEW: notation at-a-glance ---
 \begin{table}[htp!]
+\vspace{-.3cm}
+\vspace{-.3cm}
+
 \centering
 \small
 \begin{tabular}{ll}\toprule
@@ -31,12 +34,15 @@ $\contrib(d)$ & per-block contribution weight (default $1$; optionally stake-wei
 \label{tab:notation}
 \end{table}
 
+\vspace{-.3cm}
 
 % --- END NEW ---
-\vspace{-1cm}
+\vspace{-.7cm}
 
 \subsection{Security Model and Protocol Basics} 
 \label{sec:model}
+%\vspace{-.3cm}
+
 We adopt a standard cryptographic model for blockchain protocols~\cite{EC:GarKiaLeo15,EC:PasSeeShe17,JC:Canetti00}. The system comprises a set of validators $\cP$ and an environment $\cZ$ controlling inputs, timing, and corruptions. Time is divided into discrete slots $s=1,2,\ldots$. We assume a partially synchronous network~\cite{DLS88,EC:PasSeeShe17}: after some unknown Global Stabilization Time (GST), all honest messages are delivered within a known bound $\Delta$; before GST, the adversary controls delays. 
 
 Players start from a common genesis block containing initial public keys and stake distribution. Validators may join or leave, and stake may change over time; for simplicity we consider a “flat” model where any player can register multiple identities to simulate more stake. The adversary $\cA$, controlled by $\cZ$, may adaptively corrupt validators up to a fraction $\alpha$ of total stake $\StakeTot=\sum_{v\in\cP}\stake(v)$. We assume $\alpha < 1/2$ unless otherwise specified. Upon corruption, $\cA$ learns the validator's secret key and internal state. Honest parties erase state upon leaving (non-persistent corruption). 
@@ -53,7 +59,7 @@ where $\domsep$ is protocol-specific constant, and $\Encode$ is a canonical enco
 \begin{equation*}
 b = \langle \id(b),\slot(b),\val(b)=v,\txs(b),\refs(b),\longref(b),y(b),\pi(b),\sigma(b)\rangle,
 \end{equation*}
-where:
+%where:
 \begin{itemize}
   \item $\id(b)$ is its unique identifier (a hash),
 
@@ -66,10 +72,15 @@ where:
 \end{itemize}
 The validator must ensure $\txs(b)$ is conflict-free (no double-spends) relative to the ledger state, and $\refs(b)\cup\{\longref(b)\}$ is an antichain in the DAG, to preserve consistency. Honest blocks are immediately gossiped to all nodes. The union of all blocks and reference edges forms a directed acyclic graph (DAG) $G$. We write $u\leadsto v$ if there is a directed path from block $u$ to $v$ in $G$. For a block $b$, let $\Anc(b)=\{a: a\leadsto b\}$ and $\Desc(b)=\{d: b\leadsto d\}$, with $\Anc^*(b)=\Anc(b)\cup\{b\}$, $\Desc^*(b)=\Desc(b)\cup\{b\}$. Two blocks $u$ and $v$ are {\em incomparable} (denoted $u\parallel v$) if neither $u\leadsto v$ nor $v\leadsto u$.
 
+\vspace{-.3cm}
+
 \paragraph{The Execution of Protocol.} The execution of the protocol is an interactive process: in each slot $s$, each honest player collects all messages (with adversarial delay $\le\Delta$), checks eligibility via VRF, possibly creates a block, and broadcasts it. The adversary may inject blocks for corrupted players and deliver or withhold messages. We denote by $\exec_{\Pi,\cA,\cZ}$ the complete execution transcript. Let $\chainset^s$ be the set of all chains (paths from genesis) visible to honest parties at slot $s$, and $\chain_i^s$ be the chain of party $i$ at slot $s$.
+
+\vspace{-.3cm}
 
 \subsection{Consensus Security Properties}
 \label{sec:DG-DQ-DCP}
+%\vspace{-.3cm}
 
 We recall the canonical properties for chain protocols~\cite{EC:GarKiaLeo15}: {\em Common Prefix (CP[$k$])} ensures any two honest chains differ only in the last $k$ blocks; {\em Chain Growth (CG[$\tau,\ell$])} guarantees any honest chain grows by at least $\tau\ell$ blocks over any $\ell$-slot window; and {\em Chain Quality (CQ[$\mu,\ell$])} ensures that in any $\ell$ consecutive blocks of an honest chain, at least a $\mu$ fraction are from honest parties. These imply persistence and liveness for classical blockchains~\cite{EC:GarKiaLeo15}.
 For DAG-based protocols, we define analogous properties. 
@@ -114,6 +125,7 @@ blue = frontier region; gray = common past; red = broadcast transaction event or
 
 \subsubsection{DAG Growth (DG)}
 \label{sec:DG}
+\vspace{-.3cm}
 
 In any window of $\ell$ slots after GST, honest work makes \emph{linear progress along some honest chain} in the DAG: at least $\tau_D\cdot \ell$ honest blocks created in that window end up on the past of an honest party’s fork-choice tip (i.e., on its preferred branch).
 See Figure~\ref{fig:dg} in Appendix~\ref{app:DG} for illustration of the idea. 
@@ -154,17 +166,20 @@ Black dots represent honest blocks produced during the interval.}
 \end{figure}
 }%%%%%%%%%%%%%%
 
+\vspace{-.3cm}
 
 \begin{definition}[DAG Growth]\label{def:DG}
 Fix a security parameter $\lambda$ and let $\negl(\cdot)$ denote a negligible function.
 Let $\mathrm{GST}$ be the global stabilization time and $\Delta$ the post-GST delay bound.
 For any interval $I=[s,s+\ell-1]$ of $\ell$ consecutive slots with $s\ge \mathrm{GST}$, define $H_I$ to be the set of honest blocks created in $I$ that, by the end of slot $s+\ell-1+\Delta$, are contained in the ancestor set of the fork-choice tip of at least one honest party (equivalently, they lie on some honest party’s preferred branch).
 We say $\mathrm{DG}[\tau_D,\ell]$ holds if for all such intervals
-\[
-\Pr\!\big[\,|H_I|\ \ge\ \tau_D\cdot \ell\,\big]\ \ge\ 1-\negl(\lambda).
-\]
+%\[
+$\Pr\!\big[\,|H_I|\ \ge\ \tau_D\cdot \ell\,\big]\ \ge\ 1-\negl(\lambda).
+$
+%\]
 \end{definition}
 
+\vspace{-.3cm}
 
 
 \ignore{%%%%%%%%%%%%%%%%%%%%%
@@ -208,18 +223,22 @@ only in presentation; DG-Lin aligns more directly with the DAG’s parallel natu
 
 \subsubsection{DAG Quality (DQ)} 
 \label{sec:DQ}
+\vspace{-.3cm}
 
 In any window of $\ell$ slots, the fraction of honest blocks among all blocks entering the “recent frontier” (within the last $w$ slots on the preferred branch) is at least $\mu_D$.
 Please also see Figure~\ref{fig:dq} in Appendix~\ref{app:DQ} for illustration of the idea. 
 
 
+\vspace{-.3cm}
 
 \begin{definition}[DAG Quality]\label{def:DQ}
 Fix a security parameter $\lambda$. For any interval $I=[s,s+\ell-1]$ with $s\ge \mathrm{GST}$, consider the set $B_I$ of blocks that enter the preferred branch's frontier (i.e., become descendants of the fork-choice tip) during $I$. Let $B_I^{\mathsf{H}}$ be those created by honest parties.
 We say $\mathrm{DQ}[\mu_D,\ell]$ holds if
-\begin{equation*}
+%\begin{equation*}
+$
 \Pr\big[\,|B_I^{\mathsf{H}}|\ \ge\ \mu_D \cdot |B_I|\,\big]\ \ge\ 1-\negl(\lambda).
-\end{equation*}
+$
+%\end{equation*}
 \end{definition}
 
 %%%%%%%%%%%%%%%%%%%%
@@ -265,9 +284,11 @@ and green dots highlight the subset created by honest parties.}
 }%%%%%%%%%%
 
 
+\vspace{-.3cm}
 
 \subsubsection{DAG Common Past (DCP)}
 \label{sec:DCP}
+\vspace{-.3cm}
 
 For any two honest views of the DAG at times $t_1\le t_2$, if we remove the last $k_D$ layers from the current frontier, the remaining past is identical. Equivalently, all honest parties share the set of ancestors up to the most recent CCA of their tips.
 Please also see Figure~\ref{fig:dcp} in Appendix~\ref{app:DCP} for illustration of the idea. 
@@ -280,14 +301,17 @@ beneath its fork-choice tip removed.
  %
 We say $\mathrm{DCP}[k_D]$ holds if for all honest parties $P,Q$ and all slots
 $t_1 \le t_2$ after $\mathrm{GST}$,
-\[
+%\[
+$
 \Pr\!\Big[\, \mathsf{Trim}(V_{t_1}^P,k_D)\;\subseteq\;\mathsf{Trim}(V_{t_2}^Q,k_D)\,\Big]
 \;\ge\; 1-\negl(\lambda).
-\]
+$
+%\]
 That is, once the most recent $k_D$ layers are trimmed, the earlier view of
 any honest party is always contained in the later view of any other honest party,
 except with negligible probability.
 \end{definition}
+\vspace{-.3cm}
 
 
 %%%%%%
@@ -405,12 +429,15 @@ Fix $k \in \mathbb{N}$. For an honest party $P$ and slot $t$, let $L_t^P$ denote
 the ledger (totally ordered list of transactions) induced by applying the fork-choice
 rule to $V_t^P$. We say $\mathrm{Persistence}[k]$ holds if for all pairs of honest
 parties $P,Q$ and all slots $t_1 \le t_2$ after $\mathrm{GST}$,
-\[
+%\[
+$
 \Pr\!\Big[\, L_{t_1}^P[1..n-k] \;=\; L_{t_2}^Q[1..n-k] \,\Big] \;\ge\; 1-\negl(\lambda),
-\]
+$
+%\]
 where $n=|L_{t_1}^P|$. That is, all but the last $k$ transactions in $P$'s ledger
 at time $t_1$ are immutable and appear in $Q$'s ledger at time $t_2$.
 \end{definition}
+\vspace{-.3cm}
 
 \ignore{%%%
 \begin{remark}[On DAG Growth and Persistence]
@@ -474,9 +501,11 @@ broadcast by an honest party $P$ in every slot after $\mathrm{GST}$, let
 $E_t^Q(\tx)$ denote the event that honest party $Q$'s ledger $L_t^Q$ at the end of slot $t$
 contains $\tx$. We say $\mathrm{Liveness}[\ell_{\mathrm{live}}]$ holds if for all honest parties $P,Q$
 and for all slots $s \ge \mathrm{GST}$,
-\[
+%\[
+$
 \Pr\!\Big[\, \exists\, t \in [s,\,s+\ell_{\mathrm{live}}] : E_t^Q(\tx) \,\Big] \;\ge\; 1-\negl(\lambda).
-\]
+$
+%\]
 In words: any transaction repeatedly injected by an honest party after $\mathrm{GST}$
 is guaranteed to appear in every honest party’s ledger within $\ell_{\mathrm{live}}$ slots,
 except with negligible probability.

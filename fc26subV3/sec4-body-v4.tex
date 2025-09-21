@@ -1,4 +1,5 @@
 %!TEX root = mainMPOSv1.tex
+\vspace{-.3cm}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -8,6 +9,7 @@
 \section{\ProjBase: A Practical DAG-Based PoS Protocol}
 \label{sec:base}
 
+\vspace{-.3cm}
 
 In Section~\ref{sec:ideal} we analyzed Cryptareon-Ideal, an abstract multi-proposer DAG protocol, and showed that it satisfies the properties (DG, DQ, DCP, TB) and thereby Persistence and Liveness. We now move to Cryptareon-Base, a practical instantiation that relaxes the idealized assumptions to fit a partially synchronous network and proof-of-stake setting. In particular, Cryptareon-Base uses VRF-based eligibility, bounded short references plus an optional long reference, and explicit transaction validity checks. Our task in this section is to demonstrate that these practical constraints preserve the key properties, ensuring that the same soundness guarantees established for the idealized model continue to hold in a realistic environment.
 
@@ -51,10 +53,11 @@ $P$ maintains a local DAG $G_s=(V_s,E_s)$ and a ledger state view induced by its
 
   \item \textbf{Block creation and gossip (Alg.~\ref{alg:block-creation}).}
   If eligible and after validity checks, $P$ assembles
-  \[
+ % \[
+ $
   b=\langle 
   \id,\val{=}P,\slot{=}s,\txs{=}T,\refs{=}R\cup\{\ell\},y,\pi,\sigma\rangle,
-  \]
+$ %  \]
   signs it, inserts it locally, and gossips.
 
   \item \textbf{Block reception (Alg.~\ref{alg:block-reception}, continuous during slot).}
@@ -257,14 +260,14 @@ $P$ may \emph{finalize} a block $B$ once it is $k$-deep under $\hat T_s$, with $
 \label{subsec:base-security}
 We prove the DAG properties and ledger properties for \ProjBase under~\eqref{eq:base-params}. We write $\lambda_h \triangleq \mathbb{E}[\#\text{honest eligible per slot}]=\Theta(pH|\Val|)$.
 
-\subsubsection{Consensus properties: DG, DQ, TB, DCP}
+%\subsubsection{Consensus properties: DG, DQ, TB, DCP}
 \begin{theorem}[Consensus properties of \ProjBase]\label{thm:base-consensus-summary}
 Under the parameter discipline $w \ge \Delta + \omega(\log \lambda)$ and $H>1/2+\varepsilon$,
 \ProjBase{} satisfies DG, DQ, TB, and DCP after GST with constant parameters (in~$\lambda$).
 Formal statements and proofs are given in Appendix~\ref{app:base-security}.
 \end{theorem}
 
-\noindent\textit{Proof sketch.} We couple the windowed, CCA-anchored dynamics to the idealized analysis, use VRF concentration, and bound the frontier width via TB.
+%\noindent\textit{Proof sketch.} We couple the windowed, CCA-anchored dynamics to the idealized analysis, use VRF concentration, and bound the frontier width via TB.
 
 
 
@@ -307,7 +310,7 @@ By TB, the honest frontier has bounded width $O(\lambda_h\Delta)$. After $\Delta
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-\subsubsection{Ledger properties: Persistence and Liveness}
+%\subsubsection{Ledger properties: Persistence and Liveness}
 
 \begin{theorem}[Ledger properties of \ProjBase]\label{thm:base-ledger-summary}
 Under the parameter discipline $w \ge \Delta + \omega(\log \lambda)$ and $H>1/2+\varepsilon$,

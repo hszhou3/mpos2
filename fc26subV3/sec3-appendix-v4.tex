@@ -104,12 +104,14 @@ Blocks $u,v$ are incomparable, written $u\parallel v$, if neither $u\leadsto v$ 
 If $\Eligibility(v,s)=1$, validator $v$ creates a block.
 
 \paragraph{Tips.} The tip set $\Tips(G)$ of the DAG $G$ is the set of vertices with no descendants: $\Tips(G)=\{v\in V:\ \nexists\,u\in V \text{ with } v\to u\}$. More formally, 
+}%%%%%%%%%%%%%%%
+
+
+\subsection{Additional Definitions Used in Section~\ref{sec:ideal-notion}}\label{app:ideal-notion}
 
 \begin{definition}[Tips]
 For a DAG $G=(V,E)$, $\Tips(G)\triangleq\{v\in V:\text{$v$ has out-degree $0$}\}$.
 \end{definition}
-
-\subsubsection*{Additional Definitions Used in this Section}
 
 \begin{definition}[Antichain; Maximal vs Maximum]
 $A\subseteq V$ is an antichain if all elements are pairwise incomparable in $G$. Maximal means inclusion-maximal; maximum means largest cardinality.
@@ -150,6 +152,8 @@ Let $a$ be the last finalized checkpoint if one exists; otherwise the earliest b
 %In \ProjIdeal, when a validator $v$ is eligible at slot $s$, it samples transactions and references all current tips (or equivalently, all blocks in a maximum antichain). The following algorithm captures this:
 
 
+
+\ignore{%%%%%%%%%%%
 \subsubsection{Idealized Antichain Selection and Block Creation}
 We allow either a greedy or exact (Dilworth-based) antichain selection. Once eligible in slot $s$, a validator references
 the selected antichain and broadcasts a block carrying a public-coin label $y(b)\in[0,1)$ used \emph{only} for tie-breaking in Section~\ref{sec:ideal}. 
@@ -328,6 +332,11 @@ If equal, we use the smallest public-coin label for tie-break.
 \EndIf
 \end{algorithmic}
 \end{algorithm}
+}%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Additional Discussions for Section~\ref{sec:ideal-protocol}}
+\label{app:ideal-protocol}
 
 \paragraph{Rationale.} 
 Using $y(\cdot)$ prevents adversarial control via transaction ordering or content hashing; it is a stand-in for the VRF output in the practical protocol.
@@ -360,8 +369,6 @@ without any auxiliary consensus layer.
 \end{remark}
 
 
-}%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
 

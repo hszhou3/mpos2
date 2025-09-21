@@ -163,9 +163,18 @@ R & \text{otherwise.}
 \end{algorithmic}
 \end{algorithm}
 
-\paragraph{Slashing pointer.} Slashable evidence is supported; see App.~\ref{app:slashing-details} for details.
+%\paragraph{Slashing pointer.} Slashable evidence is supported; see App.~\ref{app:slashing-details} for details.
 
 
+%\subsection{Slashing conditions and evidence (moved from §4)}
+%\label{app:slashing-details}
+%\ignore{%%
+% ---- moved from §4 ----
+\begin{remark}[Slashable misbehavior]
+If $\VerifySig(\pk(v); b, \sigma)$ holds but $\VRFVerify$ fails, or if $y \ge p(s,v)$, 
+the block $b$ constitutes slashable evidence of misbehavior by $v$. 
+\end{remark}
+%}%%%%
 
 
 \paragraph{Details:} $\SampleMempool(M,1/N_{\MCP};\rho)$ returns a pseudo-random subset of transactions from $M$ using seed $\rho$, to ensure verifiability. For example, setting the fraction to $1/N_{\MCP}$ partitions $M$ across concurrent proposals, reducing duplication. This sampling rate can be tuned for more redundancy if desired. $\GreedyAntichain(G_{s,w})$ deterministically selects a large antichain in $G_{s,w}$. $\OptionalLongRef$ optionally returns a single ancestor (e.g., the last finalized block) outside the window, for connectivity. We ensure $\txs(b)$ is conflict-free with existing ancestor transactions, and we define $\id(b)$ as the hash of $(\val(b),\slot(b),\txs(b),\refs(b),y(b),\pi(b))$ (this $\id$ is then signed to produce $\sigma(b)$). The new block $b$ is then integrated into the local DAG and gossiped.
@@ -319,7 +328,7 @@ By TB, the honest frontier has bounded width $O(\lambda_h\Delta)$. After $\Delta
 
 
 \subsubsection{Ledger properties: Persistence and Liveness}
-\
+
 
 We now show ledger properties can be achieved as stated in Theorem~\ref{thm:base-ledger-summary}. 
 
@@ -355,7 +364,8 @@ Long-refs guarantee global connectivity but carry zero weight. Implementations s
 \end{remark}
 
 \begin{remark}[Slashing conditions]
-If a validator is caught producing two blocks in the same slot (equivocation) \emph{or} a block in a slot for which it was not eligible ($y(b)\not< p(\slot(b),\val(b))$), a slashable fault occurs. In \ProjBase, such misbehavior can be detected via conflicting signatures and VRF proofs. An honest observer can include a special transaction containing $(\id(b),\id(b'),y(b),y(b'),\pi(b),\pi(b'),\sigma(b),\sigma(b'))$ to slash $v$'s stake. This disincentivizes equivocation and threshold-faking (even short-range attempts yield no lasting gain, as they cannot increase branch weight beyond the current window).
+If a validator is caught producing two blocks in the same slot (equivocation) \emph{or} a block in a slot for which it was not eligible ($y(b)\not< p(\slot(b),\val(b))$), a slashable fault occurs. In \ProjBase, such misbehavior can be detected via conflicting signatures and VRF proofs. An honest observer can include a special transaction containing \\
+$(\id(b),\id(b'),y(b),y(b'),\pi(b),\pi(b'),\sigma(b),\sigma(b'))$ to slash $v$'s stake. This disincentivizes equivocation and threshold-faking (even short-range attempts yield no lasting gain, as they cannot increase branch weight beyond the current window).
 \end{remark}
 
 \subsubsection{Discussion of Security and Parameters}

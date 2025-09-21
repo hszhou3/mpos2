@@ -1,10 +1,12 @@
 %!TEX root = mainMPOSv1.tex
 
-
+%\newpage
 \section{Supplemental Materials for Section~\ref{sec:eval}}
 \label{app:eval}
 
+Figures for the empirical evaluation of \ProjBase can be found in this Appendix. 
 
+\ignore{%%%%
 This section reports the empirical evaluation of \ProjBase. We built a discrete-event simulator and compared \ProjBase to Ouroboros Praos with a focus on reorg depth under increasing chain parallelization. The simulator abstracts away non-essential details to isolate ledger growth and reorg behavior under configurable adversarial stake, network delay, and block-production parallelism (number of concurrent proposers).
 
 \subsection{Implementation Overview}
@@ -51,32 +53,52 @@ The network delay is exponential with mean $1.3$ s. Honest nodes build best-effo
 
 \subsection{Block Parallelism}
 We control block-production parallelism via parameter $f$, which scales the block production rate relative to the base value.
+}%%%%%%%%
+%%%%%%%%%%%
+
+
+
 \begin{figure}[htbp!]
 \includegraphics[width=0.9\textwidth]{figs/f-parallelism-bias.png}
 \caption{Relationship between $f$, node stake, and the probability of winning a slot.}
 \label{fig:f-parallelism-bias}
 \end{figure}
+
+\ignore{%%%%%
 Figure~\ref{fig:f-parallelism-bias} shows that increasing $f$ advantages the adversary by raising its chance to win a slot beyond its stake proportion. This effect is stronger when adversarial stake is concentrated in a single entity rather than split across identities.
 
 
 We choose this method for its simplicity; the resulting overestimation of adversarial capability is acceptable for our purposes. Future work will reduce this bias with an alternative parallelism mechanism.
 
 \subsection{ILP vs. Global Heuristic}
+}%%%%%%%%%%%%%%
+
+
 \begin{figure}[htbp!]
 \subfloat[ILP-based optimization]{\includegraphics[width=\textwidth/2]{figs/ILP.png}}
 \subfloat[Global heuristic optimization]{\includegraphics[width=\textwidth/2]{figs/Heuristic.png}}
 \caption{Comparison of adversary optimization strategies: ILP-based vs. global heuristic.}
 \label{fig:optimization}
 \end{figure}
+
+\ignore{%%%%%
+
 ILP-based optimization (exhaustive local within the window) yields rarer, longer reorgs but is computationally expensive. The global heuristic scales to many more attacks but produces shorter reorgs on average, consistent with its weaker optimization power (Fig.~\ref{fig:optimization}).
+}%%%%
+
 
 \begin{figure}[htbp!]
 \includegraphics[width=0.7\textwidth]{figs/Praos.png}
-\caption{Reorg depth sensitivity of the Ouroborous Praos with $f=0.05$. Black lines present individual chain reorgs depth.}
+\caption{Reorg depth sensitivity of the Ouroboros Praos with $f=0.05$. Black lines present individual chain reorgs depth.}
 \label{fig:praos}
 \end{figure}
 
+\ignore{%%%%%
+
 \subsection{Parallelism vs. Reorg Length}
+}%%%%%%%%%%
+
+
 \begin{figure}[htbp!]
 \subfloat[5x parallelization, $f=0.25$]{\includegraphics[width=\textwidth/2]{figs/f-0.25.png}}
 \subfloat[6x parallelization, $f=0.30$]{\includegraphics[width=\textwidth/2]{figs/f-0.30.png}}\\
@@ -86,6 +108,8 @@ ILP-based optimization (exhaustive local within the window) yields rarer, longer
 \caption{Impact of parallelization level on reorg depth for \ProjBase with 30\% adversarial stake.}
 \label{fig:parallelization}
 \end{figure}
+
+\ignore{%%%%%%%
 Empirically, higher parallelism (larger $f$) correlates with shorter reorgs, especially in large-scale heuristic runs that enable more attack attempts (Fig.~\ref{fig:parallelization}). ILP-based local optima can surface rare long reorgs in small samples, but across $f\in\{0.25,0.30,0.35,0.40,0.50\}$ tail depth decreases as $f$ increases, aligning with the “more votes, faster convergence” intuition.
 
 %\subsection{Reorg Distributions vs. Stake and Latency}
@@ -109,3 +133,4 @@ Across benchmarks, we find:
 %\item \textbf{Stronger adversaries.} With $40$--$45\%$ adversarial control, \ProjBase{} maintains bounded reorgs and compares favorably to Praos under the same conditions.
 %\item \textbf{Near-majority and majority.} At $49\%$, the system degrades gracefully; at $\ge 51\%$, the attacker dominates (as expected), but the induced distributions remain informative for parameterization and risk analysis.
 \end{itemize}
+}%%%%%%%%%%%
