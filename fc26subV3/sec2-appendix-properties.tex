@@ -1,0 +1,517 @@
+%!TEX root = mainMPOSv1.tex
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Appendix for Section 2
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Supplemental Materials for Section~\ref{sec:prelim}} 
+\label{app:prelim}
+
+\subsection{Consensus Security Properties}
+\label{app:DG-DQ-DCP}
+
+We recall the canonical properties for chain protocols~\cite{EC:GarKiaLeo15}: {\em Common Prefix (CP[$k$])} ensures any two honest chains differ only in the last $k$ blocks; {\em Chain Growth (CG[$\tau,\ell$])} guarantees any honest chain grows by at least $\tau\ell$ blocks over any $\ell$-slot window; and {\em Chain Quality (CQ[$\mu,\ell$])} ensures that in any $\ell$ consecutive blocks of an honest chain, at least a $\mu$ fraction are from honest parties. These imply persistence and liveness for classical blockchains~\cite{EC:GarKiaLeo15}.
+For DAG-based protocols, we define analogous properties. 
+
+
+\begin{figure}[htbp!]
+\centering
+\begin{tikzpicture}[x=1cm,y=0.8cm,>=Latex,thick]
+
+  % Black = blocks
+  \fill[black] (0,0) circle (2pt);
+  \node[right=0.4cm of {(0,0)}] {\scriptsize Generic block};
+
+  % Green = honest/finalized prefix
+  \fill[green!40!black] (0,-1) rectangle (0.4,-0.6);
+  \node[right=0.6cm of {(0.4,-0.8)}] {\scriptsize Honest/finalized prefix};
+
+  % Blue = frontier
+  \fill[blue!30] (0,-2) rectangle (0.4,-1.6);
+  \node[right=0.6cm of {(0.4,-1.8)}] {\scriptsize Frontier / last $k_D$ layers};
+
+  % Gray = common past
+  \fill[black!20] (0,-3) rectangle (0.4,-2.6);
+  \node[right=0.6cm of {(0.4,-2.8)}] {\scriptsize Common past region};
+
+  % Red = transaction broadcast
+  \fill[red!70] (0,-4) circle (2pt);
+  \node[right=0.4cm of {(0,-4)}] {\scriptsize Transaction broadcast / inclusion};
+
+\end{tikzpicture}
+\caption{\textbf{Legend of colors used in Figures~\ref{fig:dg}--\ref{fig:liveness}.} 
+Black = blocks; green = honest or finalized prefix; 
+blue = frontier region; gray = common past; red = broadcast transaction event or inclusion.}
+\label{fig:legend}
+\end{figure}
+
+
+
+
+\subsubsection{DAG Growth (DG)}
+\label{app:DG}
+
+In any window of $\ell$ slots after GST, honest work makes \emph{linear progress along some honest chain} in the DAG: at least $\tau_D\cdot \ell$ honest blocks created in that window end up on the past of an honest party’s fork-choice tip (i.e., on its preferred branch).
+
+\begin{figure}[htp!]
+\centering
+\resizebox{0.99\linewidth}{!}{%
+\begin{tikzpicture}[x=0.16cm,y=0.6cm,>=Latex,thick]
+  % Axis
+  \draw[-{Latex}] (0,0) -- (98,0) node[below right] {slots};
+
+  % Interval [s, s+ell]
+  \draw[very thick,|-|] (40,0) -- (80,0);
+  \node[below] at (40,-0.1) {\scriptsize $s$};
+  \node[below] at (80,-0.1) {\scriptsize $s+\ell$};
+  \node[below] at (60,-0.2) {\scriptsize length $\ell$};
+
+  % Honest blocks accumulating
+  \foreach \x in {42,45,48,51,54,57,60,63,66,69,72,75,78} {
+    \fill[black] (\x,0.8) circle (1.1pt);
+  }
+  \node[align=left] at (16,1.1) {\scriptsize Honest blocks created in $[s,s+\ell]$ \\[-1pt] \scriptsize join the past of some honest preferred tip};
+
+  % Arrow up
+  \draw[->] (60,0.6) -- (60,1.3);
+  \node[above] at (60,1.3) {\scriptsize DG: $\ge \tau_D\ell$ honest on a preferred branch (w.h.p.)};
+\end{tikzpicture}
+}
+\caption{\textbf{DAG Growth (DG).}
+\small
+Over any $\ell$-slot interval after GST, with probability $1-\negl(\lambda)$ at least $\tau_D\ell$ honest blocks become ancestors of \emph{an honest party’s fork-choice tip} (i.e., lie on some honest preferred branch). 
+Black dots represent honest blocks produced during the interval.}
+
+\label{fig:dg}
+\end{figure}
+
+\begin{definition}[DAG Growth]\label{appdef:DG}
+Fix a security parameter $\lambda$ and let $\negl(\cdot)$ denote a negligible function.
+Let $\mathrm{GST}$ be the global stabilization time and $\Delta$ the post-GST delay bound.
+For any interval $I=[s,s+\ell-1]$ of $\ell$ consecutive slots with $s\ge \mathrm{GST}$, define $H_I$ to be the set of honest blocks created in $I$ that, by the end of slot $s+\ell-1+\Delta$, are contained in the ancestor set of the fork-choice tip of at least one honest party (equivalently, they lie on some honest party’s preferred branch).
+We say $\mathrm{DG}[\tau_D,\ell]$ holds if for all such intervals
+\[
+\Pr\!\big[\,|H_I|\ \ge\ \tau_D\cdot \ell\,\big]\ \ge\ 1-\negl(\lambda).
+\]
+\end{definition}
+
+\begin{remark}[Why this formulation]
+In a leaderless multi-proposer DAG, many honest tips can coexist and grow in parallel.
+Requiring linear growth of \emph{all} tips would conflate concurrency with lack of progress.
+The DG we define here focuses on \emph{linear progress along some honest chain} (the past of an honest fork-choice tip), which is the DAG analogue of chain-growth in linear blockchains: despite parallelism, honest parties make steady ledger progress on a preferred branch.
+This avoids interpreting DG as a global linearization of the whole DAG while still providing the liveness backbone needed for the safety/liveness proofs.
+\end{remark}
+
+% ============================= THIS PART IS NEW: Sept 11, 2025=============================
+\paragraph{DAG Linearization.}
+Fix a total order $\prec$ on block identifiers (e.g., lexicographic hash), and an \emph{anchor} $a$
+(genesis or the last finalized checkpoint). For any honest view $G_t$ at slot $t$, define the
+\emph{anchored linearization} $\Lin_t \equiv \Lin_a(G_t,\prec)$ to be the (unique) total order obtained by
+taking any topological sort of the sub-DAG $\Anc^*(\Tips(G_t)) \cap \Desc^*(a)$ and breaking ties by
+$(\text{slot},\text{id})$ according to~$\prec$. This linearization is exactly the ledger order induced by the
+anchored fork-choice (up to deterministic tie-breaking).
+
+\paragraph{DG (linearized reformulation).}
+Let $I=[s,s+\ell-1]$ be any $\ell$-slot interval after GST and let $H_I$ be the set of honest blocks
+created in $I$. By time $t=s+\ell-1+\Delta$, consider $\Lin_t$. We say \textbf{DG-Lin[$\tau_D,\ell$]}
+holds if, except with negligible probability,
+\[
+\big|\{\,b\in H_I : b \text{ appears in } \Lin_t\,\}\big| \ \ge\ \tau_D\cdot \ell .
+\]
+Intuitively: when we read the DAG through its canonical linearization $\Lin_t$, honest work advances at
+a linear rate.
+
+\paragraph{Equivalence to the original DG (informal).}
+Under our anchored, window-limited fork choice and TB, each honest party’s preferred tip determines a
+canonical linearization $\Lin_t$. An honest block that lies on the past of an honest preferred tip (in the 
+original DG) \emph{also} appears in $\Lin_t$, and conversely blocks that are absent from all honest preferred
+branches cannot appear in the anchored linearization exposed as the ledger. Hence DG and DG-Lin differ
+only in presentation; DG-Lin aligns more directly with the DAG’s parallel nature.
+% ============================================================================
+
+
+
+
+\subsubsection{DAG Quality (DQ)} 
+\label{app:DQ}
+
+In any window of $\ell$ slots, the fraction of honest blocks among all blocks entering the “recent frontier” (within the last $w$ slots on the preferred branch) is at least $\mu_D$.
+
+
+
+\begin{definition}[DAG Quality]\label{appdef:DQ}
+Fix a security parameter $\lambda$. For any interval $I=[s,s+\ell-1]$ with $s\ge \mathrm{GST}$, consider the set $B_I$ of blocks that enter the preferred branch's frontier (i.e., become descendants of the fork-choice tip) during $I$. Let $B_I^{\mathsf{H}}$ be those created by honest parties.
+We say $\mathrm{DQ}[\mu_D,\ell]$ holds if
+\begin{equation*}
+\Pr\big[\,|B_I^{\mathsf{H}}|\ \ge\ \mu_D \cdot |B_I|\,\big]\ \ge\ 1-\negl(\lambda).
+\end{equation*}
+\end{definition}
+
+\begin{figure}[htp!]
+\centering
+\resizebox{0.99\linewidth}{!}{%
+\begin{tikzpicture}[x=0.16cm,y=0.6cm,>=Latex,thick]
+  % Axis
+  \draw[-{Latex}] (0,0) -- (98,0) node[below right] {slots};
+
+  % Frontier band over an interval
+  \fill[blue!8] (40,1.4) rectangle (80,2.6);
+  \draw[blue!60!black] (40,1.4) rectangle (80,2.6);
+  \node[blue!60!black] at (60,2.9) {\scriptsize frontier over $[s,s+\ell]$};
+
+  % Honest vs total markers in frontier
+  \foreach \x in {42,46,50,54,58,62,66,70,74,78} {
+    \fill[black] (\x,2.0) circle (1.1pt); % total
+  }
+  \foreach \x in {44,48,52,60,68,76} {
+    \fill[green!50!black] (\x,2.0) circle (1.6pt); % honest subset
+  }
+
+  % Labels s and s+ell
+  \draw[very thick,|-|] (40,0) -- (80,0);
+  \node[below] at (40,-0.1) {\scriptsize $s$};
+  \node[below] at (80,-0.1) {\scriptsize $s+\ell$};
+
+  % Callout
+  \node[align=center] at (60,0.9) {\scriptsize DQ: fraction of honest among frontier entrants $\ge \mu_D$ w.h.p.};
+\end{tikzpicture}
+}
+\caption{\textbf{DAG Quality (DQ).} 
+\small 
+In any $\ell$-slot window after GST, the fraction of \emph{honest blocks} among those entering the advancing frontier is at least $\mu_D$ with probability $1-\negl(\lambda)$. 
+In the illustration, the blue band marks the advancing frontier; 
+black dots represent all blocks that enter this frontier, 
+and green dots highlight the subset created by honest parties.}
+\label{fig:dq}
+\end{figure}
+
+
+
+
+
+\subsubsection{DAG Common Past (DCP)}
+\label{app:DCP}
+
+For any two honest views of the DAG at times $t_1\le t_2$, if we remove the last $k_D$ layers from the current frontier, the remaining past is identical. Equivalently, all honest parties share the set of ancestors up to the most recent CCA of their tips.
+
+\begin{definition}[DAG Common Past (DCP)]\label{appdef:DCP}
+Fix $k_D \in \mathbb{N}$. For an honest party $P$ at slot $t$, let $V_t^P$ denote
+its view of the DAG at the end of $t$, and define
+$\mathsf{Trim}(V_t^P,k_D)$ as $V_t^P$ with the last $k_D$ layers (by slots)
+beneath its fork-choice tip removed.
+
+We say $\mathrm{DCP}[k_D]$ holds if for all honest parties $P,Q$ and all slots
+$t_1 \le t_2$ after $\mathrm{GST}$,
+\[
+\Pr\!\Big[\, \mathsf{Trim}(V_{t_1}^P,k_D)\;\subseteq\;\mathsf{Trim}(V_{t_2}^Q,k_D)\,\Big]
+\;\ge\; 1-\negl(\lambda).
+\]
+That is, once the most recent $k_D$ layers are trimmed, the earlier view of
+any honest party is always contained in the later view of any other honest party,
+except with negligible probability.
+\end{definition}
+
+
+
+\begin{figure}[htbp!]
+\centering
+\resizebox{0.99\linewidth}{!}{%
+\begin{tikzpicture}[x=0.16cm,y=0.6cm,>=Latex,thick]
+  % Axis
+  \draw[-{Latex}] (0,0) -- (98,0) node[below right] {slots};
+
+  % Common past region (identical after trimming)
+  \fill[black!8] (0,1.4) rectangle (55,2.6);
+  \draw (0,1.4) rectangle (55,2.6);
+  \node at (27.5,2.0) {\scriptsize common past (identical)};
+
+  % Frontier windows near t1 and t2 (last k_D layers)
+  \fill[blue!8] (50,1.4) rectangle (65,2.6);
+  \draw[blue!60!black] (50,1.4) rectangle (65,2.6);
+%  \node[blue!60!black] at (62.5,2.95) {\scriptsize $\mathsf{Frontier}_{t_1}^P$};
+  \node[blue!60!black] at (57.5,3.1) {\scriptsize $\mathsf{Frontier}_{t_1}^P$};
+
+  \fill[blue!8] (80,1.4) rectangle (95,2.6);
+  \draw[blue!60!black] (80,1.4) rectangle (95,2.6);
+%  \node[blue!60!black] at (92.5,2.95) {\scriptsize $\mathsf{Frontier}_{t_2}^Q$};
+  \node[blue!60!black] at (87.5,3.1) {\scriptsize $\mathsf{Frontier}_{t_2}^Q$};
+
+  % Vertical markers t1, t2
+  \draw[dashed] (65,0.3) -- (65,3.2) node[above] {$t_1$};
+  \draw[dashed] (95,0.3) -- (95,3.2) node[above] {$t_2$};
+
+  % Braces highlighting "trim" operation
+  \draw[decorate,decoration={brace,amplitude=6pt}] (65,2.95) -- (50,2.95)
+    node[midway,above=7pt] {\scriptsize remove last $k_D$};
+  \draw[decorate,decoration={brace,amplitude=6pt}] (95,2.95) -- (80,2.95)
+    node[midway,above=7pt] {\scriptsize remove last $k_D$};
+
+  % Annotation showing subset relation of trimmed DAGs
+  \node[align=center] (trimEq) at (40,0.55)
+    {\scriptsize $\mathsf{Trim}(V_{t_1}^P,k_D)\;\subseteq\;\mathsf{Trim}(V_{t_2}^Q,k_D)$};
+
+  % Arrows from braces to annotation
+  \draw[->,blue!60!black] (57.5,2.65) .. controls (57.5,1.6) and (45,1.2) .. (trimEq.north);
+  \draw[->,blue!60!black] (87.5,2.65) .. controls (87.5,1.6) and (55,1.2) .. (trimEq.north);
+
+\end{tikzpicture}
+}
+\caption{\textbf{DAG Common Past (DCP).} 
+The \textcolor{black!60!white}{gray region} shows the common past that all honest parties agree on. 
+The \textcolor{blue!60!black}{blue regions} represent the most recent $k_D$ layers 
+(\,$\mathsf{Frontier}_{t_1}^P$, $\mathsf{Frontier}_{t_2}^Q$\,) beneath the fork-choice tips at times $t_1\le t_2$. 
+By removing these blue frontier layers, the earlier trimmed DAG is always contained in the later one,
+i.e., $\mathsf{Trim}(V_{t_1}^P,k_D)\subseteq \mathsf{Trim}(V_{t_2}^Q,k_D)$,
+with probability $1-\negl(\lambda)$.}
+\label{fig:dcp}
+\end{figure}
+
+
+\begin{remark}[Consistency of DAG properties]
+Definitions~\ref{def:DG} (DAG Growth),~\ref{def:DQ} (DAG Quality), and~\ref{def:DCP} (DAG Common Past) are all stated relative to an honest party’s fork-choice tip and its preferred branch. This ensures consistency across the properties: \emph{DG} guarantees linear progress on some honest preferred chain, \emph{DQ} guarantees that honest blocks dominate the frontier of that chain, and \emph{DCP} guarantees that honest parties’ preferred branches agree on a long common past. Together, these properties provide a coherent DAG analogue of the chain-growth, chain-quality, and common-prefix properties from backbone analyses.
+\end{remark}
+
+
+
+%\newpage
+\subsection{Ledger Security Properties}
+
+\subsubsection{Persistence (Safety)}
+\label{app:persistence}
+
+A protocol has \emph{persistence} with parameter $k$ if for any two honest times $t_1\le t_2$,
+the ledgers induced by the fork-choice at those times agree on all transactions that are at least $k$-deep at time $t_1$,
+except with probability $\negl(\lambda)$.
+
+
+\begin{figure}[htbp!]
+\centering
+\resizebox{0.99\linewidth}{!}{%
+\begin{tikzpicture}[x=0.16cm,y=0.6cm,>=Latex,thick]
+  % Axis
+  \draw[-{Latex}] (0,0) -- (98,0) node[below right] {slots};
+
+  % t1 and t2 markers
+  \draw[dashed] (70,-2.0) -- (70,3.0) node[above] {$t_1$};
+  \draw[dashed] (90,-2.0) -- (90,3.0) node[above] {$t_2$};
+
+  % k-deep prefix at t1
+  \fill[green!12] (0,1.4) rectangle (45,2.6);
+  \draw[green!40!black] (0,1.4) rectangle (45,2.6);
+  \node[green!40!black,anchor=west] at (0.5,2.0) {\scriptsize $k$-deep prefix at $t_1$};
+
+  % Same prefix at t2 (visual echo)
+  \draw[green!40!black,dashed] (0,1.4) rectangle (45,2.6);
+  \node[green!40!black] at (22.5,1.0) {\scriptsize remains identical at $t_2$};
+
+  % Legend arrow
+  \draw[->] (46,2.0) -- (68,2.0) node[midway,above] {\scriptsize immutable region};
+\end{tikzpicture}
+}
+\caption{\textbf{Persistence (Safety).} 
+\small 
+All but the last $k$ transactions in the ledger at time $t_1$ remain immutable and appear in every honest ledger at any later time $t_2\ge t_1$, except with probability $1-\negl(\lambda)$. 
+The green region shows the $k$-deep finalized prefix at $t_1$, which remains unchanged in later ledgers.}
+
+\label{fig:persistence}
+\end{figure}
+
+\begin{definition}[Persistence (Safety)]\label{appdef:persistence}
+Fix $k \in \mathbb{N}$. For an honest party $P$ and slot $t$, let $L_t^P$ denote
+the ledger (totally ordered list of transactions) induced by applying the fork-choice
+rule to $V_t^P$. We say $\mathrm{Persistence}[k]$ holds if for all pairs of honest
+parties $P,Q$ and all slots $t_1 \le t_2$ after $\mathrm{GST}$,
+\[
+\Pr\!\Big[\, L_{t_1}^P[1..n-k] \;=\; L_{t_2}^Q[1..n-k] \,\Big] \;\ge\; 1-\negl(\lambda),
+\]
+where $n=|L_{t_1}^P|$. That is, all but the last $k$ transactions in $P$'s ledger
+at time $t_1$ are immutable and appear in $Q$'s ledger at time $t_2$.
+\end{definition}
+
+\begin{remark}[On DAG Growth and Persistence]
+The proof of persistence later in Sections~3.4.2 and~4.3.2 relies on DG 
+to guarantee that honest blocks accumulate at a linear rate \emph{along honest preferred branches}. 
+This ensures that once a block is $k$-deep under a fork-choice tip, the honest margin behind it 
+grows steadily, preventing adversarial branches from overturning it. 
+\end{remark}
+
+
+
+
+\subsubsection{Liveness}
+\label{app:liveness}
+
+
+
+A protocol has \emph{liveness} with parameter $\ell_{\mathrm{live}}$ if for any valid transaction broadcast continuously by an honest party,
+the transaction appears in the ledger of every honest party within $\ell_{\mathrm{live}}$ slots after $\mathrm{GST}$,
+except with probability $\negl(\lambda)$.
+
+
+
+\begin{figure}[htp!]
+\centering
+\resizebox{0.99\linewidth}{!}{%
+\begin{tikzpicture}[x=0.16cm,y=0.6cm,>=Latex,thick]
+  % Axis
+  \draw[-{Latex}] (0,0) -- (98,0) node[below right] {slots};
+
+  % Broadcast start s and window [s, s+ell_live]
+  \draw[very thick,|-|] (40,-0.8) -- (75,-0.8);
+  \node[below] at (40,-0.8) {\scriptsize $s$};
+  \node[below] at (75,-0.8) {\scriptsize $s+\ell_{\mathrm{live}}$};
+  \node[below] at (57.5,-0.9) {\scriptsize inclusion window};
+
+  % Broadcast event
+  \fill[red!70] (40,-0.8) circle (1.3pt);
+  \node[below=4pt,red!70] at (40,-0.8) {\scriptsize $\tx$ broadcast repeatedly};
+
+  % Inclusion arrow into ledger
+  \draw[->,red!70] (68,-0.3) -- (68,1.2);
+  \node[red!70,align=center] at (68,1.5) {\scriptsize $\tx$ appears in $L_t^Q$\\[-1pt]\scriptsize for some $t\in[s,s+\ell_{\mathrm{live}}]$};
+\end{tikzpicture}
+}
+\caption{\textbf{Liveness.} 
+\small
+Any valid transaction broadcast continuously by an honest party after GST is included in every honest ledger within $\ell_{\mathrm{live}}$ slots, except with probability $1-\negl(\lambda)$. 
+Red marks the transaction broadcast event at slot $s$ and the inclusion window $[s,s+\ell_{\mathrm{live}}]$, with an arrow showing when the transaction enters an honest ledger.}
+
+%\caption{\textbf{Liveness.} Any valid transaction broadcast continuously by an honest party after GST is included in every honest ledger within $\ell_{\mathrm{live}}$ slots, except with probability $1-\negl(\lambda)$.}
+\label{fig:liveness}
+\end{figure}
+
+
+\begin{definition}[Liveness]\label{appdef:liveness}
+Fix $\ell_{\mathrm{live}} \in \mathbb{N}$. For any valid transaction $\tx$ that is
+broadcast by an honest party $P$ in every slot after $\mathrm{GST}$, let
+$E_t^Q(\tx)$ denote the event that honest party $Q$'s ledger $L_t^Q$ at the end of slot $t$
+contains $\tx$. We say $\mathrm{Liveness}[\ell_{\mathrm{live}}]$ holds if for all honest parties $P,Q$
+and for all slots $s \ge \mathrm{GST}$,
+\[
+\Pr\!\Big[\, \exists\, t \in [s,\,s+\ell_{\mathrm{live}}] : E_t^Q(\tx) \,\Big] \;\ge\; 1-\negl(\lambda).
+\]
+In words: any transaction repeatedly injected by an honest party after $\mathrm{GST}$
+is guaranteed to appear in every honest party’s ledger within $\ell_{\mathrm{live}}$ slots,
+except with negligible probability.
+\end{definition}
+
+\begin{remark}[On DAG Growth and Liveness]
+Liveness requires that valid transactions eventually appear in all honest ledgers. 
+The revised DG property, formulated with respect to preferred branches, 
+ensures that honest block production makes linear progress in those branches. 
+Coupled with TB (to prevent tips from fragmenting indefinitely) 
+and DQ (to ensure honest dominance), this guarantees that transactions 
+broadcast after GST will be absorbed and confirmed within bounded time. 
+\end{remark}
+
+
+
+
+
+
+
+%\newpage
+% --- THIS PART IS NEW: compact necessity statement ---
+\begin{remark}[Necessity of TB in one picture]
+Even with DG, DQ, and DCP, two honest components can grow in parallel during delayed visibility. 
+TB caps the number of concurrent honest tips so that, once views synchronize, a simple ``include visible preferred tips up to cap'' policy forces a merge within $O(w)$ slots.
+Long illustrative scenarios are deferred to an appendix in the full version.
+\end{remark}
+% --- END NEW ---
+
+
+\subsection{Tip Boundedness and Its Necessity}%\n
+\label{subsec:tip-boundedness}
+
+The preceding properties (DAG Growth, DAG Quality, DAG Common Past) capture
+progress, fairness, and eventual agreement on history. However, these three
+alone are insufficient to guarantee a secure ledger. We introduce the additional
+invariant of \emph{Tip Boundedness} (TB).
+
+\begin{definition}[Tip Boundedness]
+A protocol satisfies $\mathsf{TB}[\beta]$ if, at any time after GST, the number
+of pairwise \emph{incomparable honest tips} (tips that are not ancestors of one
+another) is at most $\beta$, except with negligible probability. Here $\beta$ is
+$O(\Delta \cdot \text{block rate})$, i.e., proportional to the maximum number of
+honest blocks that can be created during the delay window $\Delta$.
+\end{definition}
+
+\begin{remark}[Why this formulation]
+Unlike DG, DQ, and DCP which can be interpreted in a linearized setting,
+TB explicitly acknowledges the DAG’s concurrency: multiple tips may
+exist at once. Bounding their number ensures that honest blocks regularly
+\emph{merge or coalesce} tips, preventing indefinite fragmentation of honest
+work. This makes DG, DQ, and DCP meaningful in the DAG setting, because they
+now apply to a bounded set of preferred branches rather than an unbounded
+frontier.
+\end{remark}
+
+\paragraph{Natural redundancy, and verifiable random selection (VRS).}
+The no-redundancy assumption highlights a sharp failure mode without TB, but real DAG deployments
+typically exhibit \emph{natural redundancy}: multiple honest proposers include the same transaction across
+concurrent branches. This redundancy cushions liveness: even if some blocks become stranded, the \emph{transaction}
+still appears on other branches that the fork-choice later prefers. 
+
+To make redundancy analyzable and tunable, we specify a simple \emph{verifiable random selection (VRS)}
+policy for transaction sampling:
+\[
+\text{Include } tx \text{ in slot } s \text{ by validator } v \iff H(\rho_s \,\|\, \texttt{txid}(tx) \,\|\, pk_v) < q\cdot 2^\kappa ,
+\]
+where $\rho_s$ is a public, unpredictable per-slot seed (e.g., derived from the VRF beacons already present),
+$q\in(0,1)$ controls expected inclusion probability per proposer, and $H$ is a hash modeled as a PRF.
+This yields (i) publicly verifiable, non-manipulable inclusion decisions; (ii) independence across validators;
+and (iii) a controllable \emph{redundancy factor}. If $m$ honest proposers are eligible in slot $s$, the number of
+honest inclusions for any fixed $tx$ in that slot is $\mathrm{Binomial}(m,q)$.
+
+\emph{Liveness under bounded redundancy.} Suppose each valid $tx$ is (re)broadcast after GST until included,
+and VRS is used with parameter $q$ while the expected number of honest proposers per slot is $\lambda_h$.
+Then in $O\!\big(\tfrac{1}{q\lambda_h}\big)$ slots, $tx$ is included in $\tilde\Theta(q\lambda_h)$ honest blocks across the last
+$w$ slots (w.h.p.). Coupled with TB (which bounds the number of competing tips) and DG/DQ, this makes
+it overwhelmingly likely that at least one of those copies lies on the eventual preferred branch, yielding
+liveness even if some redundant copies are stranded.
+
+\emph{Tuning redundancy vs.\ bandwidth.} The parameter $q$ sets the expected duplication rate:
+higher $q$ improves time-to-inclusion but increases bandwidth/verification; smaller $q$ reduces duplication
+yet still preserves liveness as long as $q\lambda_h$ remains bounded away from~$0$.
+% ============================================================================
+
+%\end{itemize}
+
+
+
+
+\begin{lemma}[Necessity of TB for Ledger Properties]
+DAG Growth, DAG Quality, and DAG Common Past are insufficient to imply persistence
+and liveness of the ledger. In particular, without Tip Boundedness there exist
+adversarial schedules where: (i) some honest blocks never accumulate any confirming
+descendants (breaking liveness, under the no-redundancy assumption), and (ii) two
+branches each accumulate enough honest blocks to satisfy DG, DQ, DCP, yet neither
+dominates, allowing divergent ledgers (breaking safety).
+\end{lemma}
+
+\begin{proof}[Proof sketch]
+Consider a DAG where honest proposers perpetually extend different tips (e.g., due
+to adversarially scheduled network delays). Both branches keep growing linearly
+(DG holds), each sees an honest fraction (DQ holds), and occasional cross-references
+ensure a large common prefix (DCP holds). However, without TB, tips are never fully
+merged: two branches may each gain infinitely many honest blocks without one ever
+outweighing the other. One can construct a schedule where two honest groups alternate
+extending two different tips, resulting in ``stalemated'' superchains. Honest
+transactions included in one branch never appear in the ledger of parties following
+the other branch (violating liveness, assuming no transaction redundancy), and a
+block confirmed in one branch can later be overturned by the other branch’s growth
+(violating persistence).
+\end{proof}
+
+\paragraph{Remark: TB vs.\ DCP and Relation to Long-Delay Attacks.}
+DAG Common Past (DCP) does \emph{not} imply Tip Boundedness (TB). DCP ensures that if one trims away the most recent $k_D$ layers, then all honest views coincide on the older prefix. However, DCP does not constrain how many incomparable tips may exist within those last $k_D$ layers. In particular, one can have a DAG where the deep past is fully common (DCP holds), yet the active frontier contains $\Theta(\Delta \cdot \text{block rate})$ or even unboundedly many tips. Thus, persistence and liveness may fail even though DG, DQ, and DCP all hold: the honest work is fragmented across too many branches to form a stable margin.
+
+This parallels the \emph{long-delay attack} described by Pass, Seeman, and shelat in their analysis of Nakamoto consensus in asynchronous networks \cite[Section~8]{EC:PasSeeShe17}. When network delays are large relative to block production, the honest chain fragments into many concurrent forks, which an adversary can exploit to cause deep reorgs. Our TB property directly precludes such fragmentation in DAG protocols: it enforces a bound on the width of the tip set, thereby ensuring that honest references continually \emph{merge or coalesce} the frontier. In this sense, TB is the DAG analogue of the synchrony assumption needed to rule out long-delay attacks in chain-based protocols.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\noindent\textbf{Why Tip Boundedness (TB) up front.} 
+DG/DQ/DCP ensure progress, fairness, and a shared past, but without a bound on concurrent honest tips the system can fragment, 
+slowing merge pressure and delaying convergence of window-filtered scores. TB asserts $|\Tips(G)|\le \beta = O(\Delta\cdot\text{rate})$ after GST, 
+which in turn makes the anchored fork-choice stabilize once tips become mutually visible.
