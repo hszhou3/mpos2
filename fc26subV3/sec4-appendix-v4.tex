@@ -202,7 +202,7 @@ R & \text{otherwise.}
   \State \textbf{reject} $b$ \Comment{cycle detected}
 \EndIf
 \If{$\exists r,r'\in \refs(b),\ r\neq r'$ such that $r\nparallel r'$ in $G$}
-  \State \textbf{reject} $b$ \Comment{$R_w$ not an antichain ($\parallel$ denotes incomparability)}\mnote{This the second thing I wanted to highlight. We might need to check if the descendants refs are also incomparable. It would be good to eliminate a situation like this ($a \to c$ and $a \to b \to c$) and it's generalization ($a \to x$ and $a \to b \to ... \to x$)}
+  \State \textbf{reject} $b$ \Comment{$R_w$ not an antichain ($\parallel$ denotes incomparability)}%\mnote{This the second thing I wanted to highlight. We might need to check if the descendants refs are also incomparable. It would be good to eliminate a situation like this ($a \to c$ and $a \to b \to c$) and it's generalization ($a \to x$ and $a \to b \to ... \to x$)}
 \EndIf
 \If{$\Conflicts(\txs(b), \Anc^*(\refs(b)))$}
   \State \textbf{reject} $b$ \Comment{UTXO conflict with ancestor}
