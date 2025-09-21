@@ -1,0 +1,6 @@
+
+%!TEX root = mainMPOSv1.tex
+
+\begin{abstract}
+We present \Proj, a family of latency-friendly, stake-weighted, leaderless proof-of-stake consensus protocols. By allowing multiple proposers per slot and using a directed acyclic graph (DAG) structure, \Proj achieves high throughput and robustness. Blocks reference each other within a sliding window, forming maximal antichains that represent parallel “votes” on history. Conflicting branches are resolved via the closest common ancestor (CCA): each branch's weight (sum of recent references) is compared, and the heavier branch is chosen. This aggregation of honest work leads to rapid finality even under network delays and adversarial conditions. We define an idealized protocol (\ProjIdeal) that abstracts away delays and bounded references, and a practical variant (\ProjBase) that incorporates VRF-based eligibility, UTXO validity, and bounded references. We prove security in the partially synchronous model by formulating DAG analogs of common-prefix, chain-growth, and chain-quality properties. Our evaluation shows that \Proj achieves low latency and high finality rate with high adversarial stake, outperforming traditional chain-based and earlier DAG-based protocols.
+\end{abstract}
