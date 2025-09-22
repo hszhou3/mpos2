@@ -4,9 +4,11 @@
 % Section 2: Security Model/Definitions 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+\section{Preliminaries} 
+\label{sec:prelim}
 
 
-\section{Security Model}
+\subsection{Security Model and Protocol Basics}
 \label{sec:model}
 
 We adopt a standard cryptographic model for blockchain protocols~\cite{EC:GarKiaLeo15,EC:PasSeeShe17,JC:Canetti00}. The system comprises a set of validators $\cP$ and an environment $\cZ$ controlling inputs, timing, and corruptions. Time is divided into discrete slots $s=1,2,\ldots$. We assume a partially synchronous network~\cite{DLS88,EC:PasSeeShe17}: after some unknown Global Stabilization Time (GST), all honest messages are delivered within a known bound $\Delta$; before GST, the adversary controls delays. 
