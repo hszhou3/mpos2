@@ -100,7 +100,7 @@ ILP-based optimization (exhaustive local within the window) yields rarer, longer
 \subfloat[7x parallelization, $f=0.35$]{\includegraphics[width=\textwidth/2]{figs/f-0.35.png}}
 \subfloat[8x parallelization, $f=0.40$]{\includegraphics[width=\textwidth/2]{figs/f-0.40.png}}\\
 \subfloat[10x parallelization, $f=0.50$]{\includegraphics[width=\textwidth]{figs/f-0.50.png}}
-\caption{Impact of parallelization level on reorg depth for \ProjBase with 30\% adversarial stake.}
+\caption{Impact of parallelization level on reorg depth for \ProjBase{} with 30\% adversarial stake.}
 \label{fig:parallelization}
 \end{figure}
 %}%%%%%%%
@@ -108,15 +108,111 @@ Empirically, higher parallelism (larger $f$) correlates with shorter reorgs, esp
 
 %\subsection{Reorg Distributions vs. Stake and Latency}
 %We assess how attacker capability (stake fraction and network control) affects the distribution of reorg depths and times. We vary $\alpha$ from $0.10$ to $0.49$ and test $\Delta$ from $0.2$ s to $2$ s, holding other parameters fixed. For each setting, we simulate long runs (up to $10^6$ slots) to obtain distributions of reorg length and finalization time.
-%
-%\paragraph{Adversarial stake.}
-%As $\alpha$ approaches $0.5$, both the frequency and length of reorgs increase. Even at $\alpha=0.45$, reorg lengths remain bounded (e.g., $\le 10$ slots with $>99\%$ probability) under $w=30$. The tail grows sharply as $\alpha\to 0.5$, reflecting loss of safety at majority. At $\alpha=0.49$, we observe occasional reorgs of depth $15$--$20$ (rare). For $\alpha<0.5$, typical reorgs stay shallow (depth $\le 3$), while extremes depend on the relationship between $\Delta$ and $w$.
-%
-%\paragraph{Network delay.}
-%Holding $\alpha=0.3$, increasing $\Delta$ relative to slot time induces more transient forks but, if $w\ge\Delta$, they resolve within $w$ slots and the reorg-depth distribution shifts only slightly. If $w<\Delta$, reorgs can grow unbounded (e.g., $w=20$ and $\Delta=30$ slots), with tips oscillating indefinitely. This confirms the necessity of $w\ge\Delta$ for security, matching the TB requirement.
-%
-%\paragraph{Finality time.}
-%Using our finality proxy (age after which reorg probability $<10^{-k}$), finality occurs within tens of slots as long as $\alpha<0.5$ and $w\ge\Delta$. For example, with $\alpha=0.3$, $\Delta=0.5$ s, and $w=30$, we reach $k=6$ in roughly $30$--$40$ slots; at $\alpha=0.45$, about $60$ slots. In secure regimes, finalization is consistently $O(w)$.
+
+\begin{figure}[htbp!]
+\subfloat[30\% of adversarial stake]{\includegraphics[width=\textwidth/2]{figs/adv-30.png}}
+\subfloat[40\% of adversarial stake]{\includegraphics[width=\textwidth/2]{figs/adv-40.png}}\\
+\subfloat[45\% of adversarial stake]{\includegraphics[width=\textwidth/2]{figs/adv-45.png}}
+\subfloat[49\% of adversarial stake]{\includegraphics[width=\textwidth/2]{figs/adv-49.png}}\\
+\subfloat[51\% of adversarial stake]{\includegraphics[width=\textwidth/2]{figs/adv-51.png}}
+\subfloat[60\% of adversarial stake]{\includegraphics[width=\textwidth/2]{figs/adv-60.png}}
+\caption{Impact of the adversarial stake delay on the reorg depth for \ProjBase with 30s block time and $f=0.25$.}
+\label{fig:adversarial}
+\end{figure}
+
+\paragraph{Adversarial stake.}
+As $\alpha$ approaches $0.5$, both the frequency and length of reorgs increase (Fig.~\ref{fig:adversarial}). Even at $\alpha=0.45$, reorg lengths remain bounded (e.g., $\le 10$ slots with $>99\%$ probability) under $w=30$. The tail grows sharply as $\alpha\to 0.5$, reflecting loss of safety at majority. At $\alpha=0.49$, we observe occasional reorgs of depth $15$--$20$ (rare). For $\alpha<0.5$, typical reorgs stay shallow (depth $\le 3$), while extremes depend on the relationship between $\Delta$ and $w$.
+
+\begin{figure}[htbp!]
+\subfloat[10 seconds block time, $f=0.1$]{\includegraphics[width=\textwidth/2]{figs/reorg-OP-10s-no_blend-2M-OK.png}}
+\subfloat[20 seconds block time, $f=0.05$]{\includegraphics[width=\textwidth/2]{figs/reorg-OP-20s-no_blend-2M-OK.png}}\\
+\subfloat[33 seconds block time, $f=0.03$]{\includegraphics[width=\textwidth/2]{figs/reorg-OP-33s-no_blend-2M-OK.png}}
+\subfloat[40 seconds block time, $f=0.025$]{\includegraphics[width=\textwidth/2]{figs/reorg-OP-40s-no_blend-2M-OK.png}}
+\caption{Impact of network delay on the reorg depth for Ouroboros Praos and \ProjBase (no parallelization, no window) with 30\% adversarial stake.}
+\label{fig:delay}
+\end{figure}
+
+\begin{figure}[htbp!]
+\subfloat[$f=0.05$ and $0$s additional delay]{\includegraphics[width=\textwidth/3]{figs/reorg-C2-20s-no_blend-d00s-w30}}
+\subfloat[$f=0.1$ and $0$s additional delay]{\includegraphics[width=\textwidth/3]{figs/reorg-C2-f0.1-no_blend-d00s-w30-100K}}
+\subfloat[$f=0.2$ and $0$s additional delay]{\includegraphics[width=\textwidth/3]{figs/reorg-C2-f0.2-no_blend-d00s-w30-100K}}\\
+\subfloat[$f=0.05$ and $2$s additional delay]{\includegraphics[width=\textwidth/3]{figs/reorg-C2-20s-no_blend-d02s-w30}}
+\subfloat[$f=0.1$ and $2$s additional delay]{\includegraphics[width=\textwidth/3]{figs/reorg-C2-f0.1-no_blend-d02s-w30-100K}}
+\subfloat[$f=0.2$ and $2$s additional delay]{\includegraphics[width=\textwidth/3]{figs/reorg-C2-f0.2-no_blend-d02s-w30-100K}}\\
+\subfloat[$f=0.05$ and $5$s additional delay]{\includegraphics[width=\textwidth/3]{figs/reorg-C2-20s-no_blend-d05s-w30}}
+\subfloat[$f=0.1$ and $5$s additional delay]{\includegraphics[width=\textwidth/3]{figs/reorg-C2-f0.1-no_blend-d05s-w30-100K}}
+\subfloat[$f=0.2$ and $5$s additional delay]{\includegraphics[width=\textwidth/3]{figs/reorg-C2-f0.2-no_blend-d05s-w30-100K}}\\
+%\subfloat[$f=0.05$ and $8$s additional delay]{\includegraphics[width=\textwidth/3]{figs/reorg-C2-20s-no_blend-d08s-w30}}
+%\subfloat[$f=0.1$ and $8$s additional delay]{\includegraphics[width=\textwidth/3]{figs/reorg-C2-f0.1-no_blend-d08s-w30-100K}}
+%\subfloat[$f=0.2$ and $8$s additional delay]{\includegraphics[width=\textwidth/3]{figs/reorg-C2-f0.1-no_blend-d08s-w30-100K}}\\
+\subfloat[$f=0.05$ and $10$s additional delay]{\includegraphics[width=\textwidth/3]{figs/reorg-C2-20s-no_blend-d10s-w30}}
+\subfloat[$f=0.1$ and $10$s additional delay]{\includegraphics[width=\textwidth/3]{figs/reorg-C2-f0.1-no_blend-d10s-w30-100K}}
+\subfloat[$f=0.2$ and $10$s additional delay]{\includegraphics[width=\textwidth/3]{figs/reorg-C2-f0.2-no_blend-d10s-w30-100K}}\\
+\subfloat[$f=0.05$ and $12$s additional delay]{\includegraphics[width=\textwidth/3]{figs/reorg-C2-20s-no_blend-d12s-w30}}
+\subfloat[$f=0.1$ and $12$s additional delay]{\includegraphics[width=\textwidth/3]{figs/reorg-C2-f0.1-no_blend-d12s-w30-100K}}
+\subfloat[$f=0.2$ and $12$s additional delay]{\includegraphics[width=\textwidth/3]{figs/reorg-C2-f0.2-no_blend-d12s-w30-100K}}\\
+\subfloat[$f=0.05$ and $15$s additional delay]{\includegraphics[width=\textwidth/3]{figs/reorg-C2-20s-no_blend-d15s-w30}}
+\subfloat[$f=0.1$ and $15$s additional delay]{\includegraphics[width=\textwidth/3]{figs/reorg-C2-f0.1-no_blend-d15s-w30-100K}}
+\subfloat[$f=0.2$ and $15$s additional delay]{\includegraphics[width=\textwidth/3]{figs/reorg-C2-f0.2-no_blend-d15s-w30-100K}}\\
+\caption{Impact of network delay on the reorg depth for \ProjBase with 30s window and 30\% adversarial stake.}
+\label{fig:c2-delay}
+\end{figure}
+
+\begin{figure}[htbp!]
+\subfloat[10 slots window length]{\includegraphics[width=\textwidth]{figs/reorg-C2-f0.25-no_blend-d20s-w10-100k.png}}\\
+\subfloat[20 slots window length]{\includegraphics[width=\textwidth/2]{figs/reorg-C2-f0.25-no_blend-d20s-w20-100k.png}}
+\subfloat[30 slots window length]{\includegraphics[width=\textwidth/2]{figs/reorg-C2-f0.25-no_blend-d20s-w30-100k.png}}
+\caption{Impact of window size on the reorg depth of \ProjBase with 30\% adversarial stake and $f=0.25$.}
+\label{fig:window}
+\end{figure}
+
+\paragraph{Network delay.}
+Holding $\alpha=0.3$, increasing $\Delta$ relative to slot time induces more transient forks (Fig.~\ref{fig:delay} and Fig.~\ref{fig:c2-delay}) but, if $w\ge\Delta$, they resolve within $w$ slots and the reorg-depth distribution shifts only slightly. If $w<\Delta$, reorgs can grow unbounded (e.g., $w=10$ and $\Delta=20$ slots Fig.~\ref{fig:window}a), with tips oscillating indefinitely. This confirms the necessity of $w\ge\Delta$ for security, matching the TB requirement.
+
+%ADVERSARY_STAKE = 0.30
+%# Run multiple experiments
+%attacked_results, total_blocks, sim = run_multiple_attacks(
+%    n_runs=1,
+%    slots=100000,
+%    f=0.25,
+%    window_size=10,
+%    use_deps=True,
+%    adversary_control=ADVERSARY_STAKE,
+%    #network=no_blend_net,
+%    network=replace(no_blend_net, broadcast_delay_mean=20), # i in [0,2,5,8,10,12,15]
+%    base_seed=0,
+%    # these are honest blocks that won't be attacked and will not count in the stats, but give room for the attack.
+%    skip_last=500
+%)
+%Largest reorg length: 6018 (~200 virtual blocks of 30-seconds)
+%Successful attacks: 53 (0.27%)
+%Successful attacks list [target block, target slot, reorg length]): [[19338, 95530, 4379], [19347, 95599, 4180], [19385, 95773, 4120], [19393, 95832, 4143], [19394, 95835, 4092], [19398, 95850, 4069], [19405, 95886, 3983], [19408, 95903, 3891], [19415, 95935, 3926], [19422, 95974, 3969], [19424, 95977, 3984], [19426, 95996, 3957], [19433, 96014, 3806], [19434, 96015, 3948], [19435, 96034, 3957], [19439, 96041, 3948], [19441, 96050, 3779], [19469, 96219, 3532], [19480, 96248, 3595], [19488, 96279, 3688], [19489, 96286, 3573], [19508, 96383, 3340], [19510, 96401, 3346], [19566, 96769, 3143], [19588, 96855, 3018], [19595, 96879, 3048], [19607, 96919, 2911], [19615, 96950, 2939], [19618, 96970, 3018], [19621, 96979, 2934], [19629, 97035, 2906], [19635, 97059, 2904], [19638, 97064, 2889], [19639, 97068, 2852], [19641, 97089, 2881], [19643, 97093, 2796], [19644, 97093, 2877], [19646, 97114, 2778], [19649, 97118, 2776], [19657, 97198, 2739], [19658, 97206, 2740], [19663, 97231, 2746], [19666, 97243, 2746], [19667, 97252, 2738], [19668, 97255, 2638], [19669, 97260, 2682], [19670, 97264, 2701], [19671, 97267, 2699], [19672, 97275, 2659], [19673, 97285, 2687], [19676, 97291, 2629], [19677, 97296, 2641], [19679, 97310, 2679]]
+%CPU times: user 16min 57s, sys: 2min 47s, total: 19min 45s
+%Wall time: 58min 10s
+
+%ADVERSARY_STAKE = 0.30
+%# Run multiple experiments
+%attacked_results, total_blocks, sim = run_multiple_attacks(
+%    n_runs=1,
+%    slots=100000,
+%    f=0.25,
+%    window_size=5,
+%    use_deps=True,
+%    adversary_control=ADVERSARY_STAKE,
+%    #network=no_blend_net,
+%    network=replace(no_blend_net, broadcast_delay_mean=10), # i in [0,2,5,8,10,12,15]
+%    base_seed=0,
+%    # these are honest blocks that won't be attacked and will not count in the stats, but give room for the attack.
+%    skip_last=500
+%)
+%Largest reorg length: 17471 (~582 virtual blocks of 30-seconds)
+%Successful attacks: 146 (0.74%)
+%Successful attacks list [target block, target slot, reorg length]): [[18875, 93071, 6867], [18888, 93131, 6818], [18894, 93180, 6780], [18900, 93218, 6710], [18903, 93238, 6531], [18913, 93288, 6621], [18928, 93339, 6581], [18936, 93373, 6621], [18937, 93377, 6451], [18938, 93390, 6539], [18939, 93393, 6521], [18946, 93449, 6501], [18948, 93459, 6491], [18949, 93469, 6484], [18951, 93486, 6340], [18952, 93488, 6479], [18954, 93507, 6436], [18958, 93519, 6434], [18961, 93547, 6375], [18963, 93562, 6379], [18964, 93564, 6256], [18971, 93619, 6372], [18972, 93623, 6278], [18980, 93658, 6280], [18991, 93715, 6259], [18992, 93719, 6135], [19023, 93860, 5980], [19031, 93926, 6050], [19032, 93928, 5947], [19038, 93948, 5844], [19050, 93994, 5940], [19056, 94030, 5902], [19062, 94065, 5907], [19075, 94090, 5835], [19086, 94154, 5651], [19088, 94160, 5689], [19102, 94289, 5558], [19110, 94347, 5577], [19125, 94421, 5415], [19154, 94583, 5405], [19157, 94593, 5399], [19158, 94599, 4960], [19166, 94624, 5241], [19184, 94757, 5005], [19226, 94965, 4990], [19232, 94993, 4800], [19237, 95008, 4799], [19242, 95038, 4852], [19249, 95082, 4790], [19261, 95145, 4699], [19262, 95146, 4793], [19263, 95153, 4832], [19266, 95164, 4803], [19267, 95166, 4800], [19270, 95195, 4799], [19271, 95198, 4788], [19272, 95198, 4799], [19274, 95199, 4748], [19275, 95205, 4786], [19276, 95205, 4777], [19277, 95208, 4788], [19278, 95210, 4751], [19280, 95212, 4700], [19282, 95221, 4478], [19285, 95247, 4685], [19286, 95250, 4645], [19293, 95264, 4509], [19294, 95279, 4619], [19296, 95298, 4619], [19297, 95313, 4615], [19301, 95353, 4516], [19305, 95379, 4614], [19306, 95383, 4605], [19308, 95393, 4477], [19320, 95473, 4504], [19324, 95482, 4438], [19326, 95489, 4433], [19327, 95494, 4449], [19334, 95520, 4470], [19335, 95521, 4346], [19337, 95528, 4414], [19340, 95549, 4399], [19341, 95560, 4392], [19343, 95562, 4344], [19345, 95584, 4384], [19346, 95599, 4328], [19348, 95603, 4388], [19349, 95607, 4299], [19352, 95614, 4315], [19355, 95630, 4282], [19357, 95651, 4279], [19358, 95651, 4279], [19359, 95652, 4324], [19360, 95667, 4327], [19361, 95670, 4324], [19363, 95674, 4272], [19365, 95683, 4300], [19366, 95691, 4275], [19367, 95692, 4279], [19368, 95695, 4276], [19369, 95695, 4280], [19370, 95695, 4259], [19371, 95697, 4280], [19373, 95698, 4266], [19374, 95698, 4166], [19377, 95726, 4208], [19379, 95732, 4199], [19380, 95739, 4205], [19386, 95779, 4184], [19387, 95787, 4207], [19388, 95788, 4150], [19389, 95793, 4163], [19390, 95794, 4128], [19392, 95829, 4109], [19393, 95832, 4163], [19394, 95835, 4083], [19396, 95847, 4069], [19398, 95850, 4107], [19399, 95853, 4066], [19401, 95871, 4065], [19402, 95874, 4097], [19405, 95886, 3986], [19407, 95901, 4039], [19409, 95915, 4061], [19411, 95928, 4066], [19413, 95931, 4065], [19414, 95933, 3985], [19417, 95937, 4011], [19420, 95959, 3996], [19425, 95987, 4002], [19426, 95996, 3983], [19427, 96001, 3945], [19430, 96009, 3964], [19431, 96010, 3961], [19432, 96013, 3980], [19433, 96014, 3923], [19434, 96015, 3928], [19441, 96050, 3833], [19442, 96069, 3873], [19443, 96074, 3887], [19446, 96087, 3863], [19448, 96096, 3804], [19449, 96101, 3722], [19451, 96111, 3780], [19633, 97051, 2821], [19674, 97286, 2614]]
+%CPU times: user 16min 31s, sys: 2min 47s, total: 19min 19s
+%Wall time: 51min 35s
+
+\paragraph{Finality time.}
+Using our finality proxy (age after which reorg probability $<10^{-k}$), finality occurs within tens of slots as long as $\alpha<0.5$ and $w\ge\Delta$. For example, with $\alpha=0.3$, $\Delta=0.5$ s, and $w=30$, we reach $k=6$ in roughly $30$--$40$ slots; at $\alpha=0.45$, about $60$ slots. In secure regimes, finalization is consistently $O(w)$.
 
 %\vspace{-.3cm}
 
@@ -125,8 +221,8 @@ Across benchmarks, we find:
 All Praos comparisons below use an equalized transaction-arrival process per Section~\ref{sec:setup} to avoid baseline-rate bias.
 \begin{itemize}
 \item \textbf{Stability at 30\% adversary.} The network consistently resists optimized reorg attempts; binned histograms of reorg lengths are time-equivalent to Praos blocks.
-\item \textbf{Quantitative comparison to Praos.} Under the strongest adversarial optimization tested (ILP-based, optimal sliding window, exhaustive local), Praos produces roughly 20-block reorgs with frequency $\approx 10^{-2}$ (Fig.~\ref{fig:praos}), whereas \ProjBase{} produces 14--15-block reorgs with frequency $\approx 1.5\times 10^{-5}$ ($\sim 600\times$ improvement). For 10-block reorgs, Praos is $\approx 7\times 10^{-1}$ vs. \ProjBase{} $\approx 8\times 10^{-5}$ ($\sim 8750\times$ improvement).
+\item \textbf{Quantitative comparison to Praos.} Under the strongest adversarial optimization tested (ILP-based, optimal sliding window, exhaustive local), Praos produces roughly 15-block reorgs with frequency $\approx 10^{-2}$ (Fig.~\ref{fig:praos}), whereas \ProjBase{} produces 14--15-block reorgs with frequency $\approx 1.5\times 10^{-5}$ ($\sim 600\times$ improvement). For 10-block reorgs, Praos is $\approx 7\times 10^{-1}$ vs. \ProjBase{} $\approx 8\times 10^{-5}$ ($\sim 8750\times$ improvement).
 \item \textbf{Effect of production rate $f$.} Increasing $f$ raises short-term instability but \emph{reduces} reorg length, accelerating resolution: at $f=0.50$ (about $10\times$ Praos), short forks occur more often yet resolve quickly; at $f=0.15$ (about $3\times$ Praos), behavior is calmer. A higher information rate increases local variance but speeds convergence.
-%\item \textbf{Stronger adversaries.} With $40$--$45\%$ adversarial control, \ProjBase{} maintains bounded reorgs and compares favorably to Praos under the same conditions.
-%\item \textbf{Near-majority and majority.} At $49\%$, the system degrades gracefully; at $\ge 51\%$, the attacker dominates (as expected), but the induced distributions remain informative for parameterization and risk analysis.
+\item \textbf{Stronger adversaries.} With $40$--$45\%$ adversarial control, \ProjBase{} maintains bounded reorgs and compares favorably to Praos under the same conditions.
+\item \textbf{Near-majority and majority.} At $49\%$, the system degrades gracefully; at $\ge 51\%$, the attacker dominates (as expected), but the induced distributions remain informative for parameterization and risk analysis.
 \end{itemize}
