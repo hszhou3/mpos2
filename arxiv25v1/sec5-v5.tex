@@ -34,7 +34,7 @@ Unless noted, default parameters are:
 \begin{center}
 \begin{tabular}{lcl}
 \toprule
-Mean network delay & = & $1.3$ s\\
+Mean network delay & = & $1.5$ s\\
 Reference window $w$ & = & $30$ slots\\
 Adversary stake & = & $0.30$ \\
 Validators & = & $1000$ \\
@@ -42,7 +42,7 @@ Validators & = & $1000$ \\
 \end{tabular}
 \end{center}
 
-The network delay is exponential with mean $1.3$ s. Honest nodes build best-effort antichains given current visibility; transaction dependencies (UTXO conflicts) are enforced. We model a worst case in which the adversary is a single, perfectly coordinated entity with zero observation delay of the honest DAG, yielding a conservative baseline.
+The network delay is exponential with mean $1.5$ s. Honest nodes build best-effort antichains given current visibility; transaction dependencies (UTXO conflicts) are enforced. We model a worst case in which the adversary is a single, perfectly coordinated entity with zero observation delay of the honest DAG, yielding a conservative baseline.
 
 %\subsection{Metrics}
 %We track: (i) \textbf{reorg length} (depth of the deepest reverted block); (ii) \textbf{time to stabilization} (slots until the last reorg across a horizon); (iii) \textbf{finality proxy} (age after which the reorg probability is $<10^{-k}$ for fixed $k$); (iv) \textbf{short-ref density} (average $\wref$ per block); and (v) \textbf{throughput proxy} (blocks per wall-clock time under setting $f$). % (vi) \textbf{concurrent tip count} (size of $\Tips(G)$ over time)
