@@ -182,12 +182,12 @@ As $\alpha$ approaches $0.5$, both the frequency and length of reorgs increase (
 \begin{tikzpicture}
 \begin{axis}[
     %title={Impact of window size on the reorg depth of \ProjBase with 30\% adversarial stake and $f=0.25$},
-    xlabel={Window size},
+    xlabel={Mean broadcast delay},
     ylabel={Reorg depth},
-    xmin=15, xmax=60,
-    ymin=294, ymax=2687,
-    xtick={15,25,30,35,40,50,55,60},
-    ytick={294,446,571,896,1352,1762,2687},
+    xmin=15, xmax=70,
+    ymin=294, ymax=3591,
+    xtick={15,25,30,35,40,50,55,60,70},
+    ytick={294,571,896,1352,1762,2687,3591},
     legend pos=north west,
     ymajorgrids=true,
     grid style=dashed,
@@ -198,18 +198,27 @@ As $\alpha$ approaches $0.5$, both the frequency and length of reorgs increase (
     %mark=square,
     ]
     coordinates {
-    (15,294)(25,356)(30,446)(35,571)(40,896)(50,1352)(55,1762)(60,2687)
+    (15,294)(25,356)(30,446)(35,571)(40,896)(50,1352)(55,1762)(60,2687)(70,3591)
     };
     \addlegendentry{0 succesful attacks}
+\addplot[
+    only marks,
+    color=red,
+    mark=triangle,
+    ]
+    coordinates {
+    (60,2687)
+    };
+    \addlegendentry{3 succesful attacks}
 \addplot[
     only marks,
     color=red,
     mark=square,
     ]
     coordinates {
-    (60,2687)
+    (70,3591)
     };
-    \addlegendentry{3 succesful attacks}
+    \addlegendentry{92 succesful attacks}
     
 \end{axis}
 \end{tikzpicture}
