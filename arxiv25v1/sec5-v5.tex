@@ -154,20 +154,71 @@ As $\alpha$ approaches $0.5$, both the frequency and length of reorgs increase (
 \subfloat[$f=0.05$ and $15$s additional delay]{\includegraphics[width=\textwidth/3]{figs/reorg-C2-20s-no_blend-d15s-w30}}
 \subfloat[$f=0.1$ and $15$s additional delay]{\includegraphics[width=\textwidth/3]{figs/reorg-C2-f0.1-no_blend-d15s-w30-100K}}
 \subfloat[$f=0.2$ and $15$s additional delay]{\includegraphics[width=\textwidth/3]{figs/reorg-C2-f0.2-no_blend-d15s-w30-100K}}\\
-\caption{Impact of network delay on the reorg depth for \ProjBase with 30s window and 30\% adversarial stake.}
+\caption{Impact of block production rate and network delay on the reorg depth for \ProjBase with 30s window and 30\% adversarial stake.}
 \label{fig:c2-delay}
 \end{figure}
 
+%\begin{figure}[htbp!]
+%\subfloat[10 slots window length]{\includegraphics[width=\textwidth]{figs/reorg-C2-f0.25-no_blend-d20s-w10-100k.png}}\\
+%\subfloat[20 slots window length]{\includegraphics[width=\textwidth/2]{figs/reorg-C2-f0.25-no_blend-d20s-w20-100k.png}}
+%\subfloat[30 slots window length]{\includegraphics[width=\textwidth/2]{figs/reorg-C2-f0.25-no_blend-d20s-w30-100k.png}}
+%\caption{Impact of window size on the reorg depth of \ProjBase with 30\% adversarial stake and $f=0.25$.}
+%\label{fig:window}
+%\end{figure}
+
 \begin{figure}[htbp!]
-\subfloat[10 slots window length]{\includegraphics[width=\textwidth]{figs/reorg-C2-f0.25-no_blend-d20s-w10-100k.png}}\\
-\subfloat[20 slots window length]{\includegraphics[width=\textwidth/2]{figs/reorg-C2-f0.25-no_blend-d20s-w20-100k.png}}
-\subfloat[30 slots window length]{\includegraphics[width=\textwidth/2]{figs/reorg-C2-f0.25-no_blend-d20s-w30-100k.png}}
-\caption{Impact of window size on the reorg depth of \ProjBase with 30\% adversarial stake and $f=0.25$.}
+\subfloat[15 seconds mean broadcast delay]{\includegraphics[width=\textwidth/3]{figs/reorg-C2-f0.25-no_blend-d15s-w30-100k-mr294-sa0.png}}
+\subfloat[25 seconds mean broadcast delay]{\includegraphics[width=\textwidth/3]{figs/reorg-C2-f0.25-no_blend-d25s-w30-100k-mr356-sa0.png}}
+\subfloat[30 seconds mean broadcast delay]{\includegraphics[width=\textwidth/3]{figs/reorg-C2-f0.25-no_blend-d30s-w30-100k-mr446-sa0.png}}\\
+\subfloat[35 seconds mean broadcast delay]{\includegraphics[width=\textwidth/3]{figs/reorg-C2-f0.25-no_blend-d35s-w30-100k-mr571-sa0.png}}
+\subfloat[40 seconds mean broadcast delay]{\includegraphics[width=\textwidth/3]{figs/reorg-C2-f0.25-no_blend-d40s-w30-100k-mr896-sa0.png}}
+\subfloat[50 seconds mean broadcast delay]{\includegraphics[width=\textwidth/3]{figs/reorg-C2-f0.25-no_blend-d50s-w30-100k-mr1352-sa0.png}}\\
+\subfloat[60 seconds mean broadcast delay]{\includegraphics[width=\textwidth]{figs/reorg-C2-f0.25-no_blend-d60s-w30-100k-mr2687-sa3.png}}
+\caption{Impact of the mean broadcast delay and the reorg depth of \ProjBase with 30\% adversarial stake, window size 30 slots, and $f=0.25$.}
 \label{fig:window}
 \end{figure}
 
+\begin{figure}[htbp!]
+\begin{tikzpicture}
+\begin{axis}[
+    %title={Impact of window size on the reorg depth of \ProjBase with 30\% adversarial stake and $f=0.25$},
+    xlabel={Window size},
+    ylabel={Reorg depth},
+    xmin=15, xmax=60,
+    ymin=294, ymax=2687,
+    xtick={15,25,30,35,40,50,55,60},
+    ytick={294,446,571,896,1352,1762,2687},
+    legend pos=north west,
+    ymajorgrids=true,
+    grid style=dashed,
+]
+
+\addplot[
+    color=blue,
+    %mark=square,
+    ]
+    coordinates {
+    (15,294)(25,356)(30,446)(35,571)(40,896)(50,1352)(55,1762)(60,2687)
+    };
+    \addlegendentry{0 succesful attacks}
+\addplot[
+    only marks,
+    color=red,
+    mark=square,
+    ]
+    coordinates {
+    (60,2687)
+    };
+    \addlegendentry{3 succesful attacks}
+    
+\end{axis}
+\end{tikzpicture}
+\caption{Relation between mean broadcast delay on the reorg depth of \ProjBase with 30\% adversarial stake, window size of 30 slots and $f=0.25$.}
+\label{fig:window-attack}
+\end{figure}
+
 \paragraph{Network delay.}
-Holding $\alpha=0.3$, increasing $\Delta$ relative to slot time induces more transient forks (Fig.~\ref{fig:delay} and Fig.~\ref{fig:c2-delay}) but, if $w\ge\Delta$, they resolve within $w$ slots and the reorg-depth distribution shifts only slightly. If $w<\Delta$, reorgs can grow unbounded (e.g., $w=10$ and $\Delta=20$ slots Fig.~\ref{fig:window}a), with tips oscillating indefinitely. This confirms the necessity of $w\ge\Delta$ for security, matching the TB requirement.
+Holding $\alpha=0.3$, increasing $\Delta$ relative to slot time induces more transient forks (Fig.~\ref{fig:delay} and Fig.~\ref{fig:c2-delay}) but, if $w\ge\Delta$, they resolve within $w$ slots and the reorg-depth distribution shifts only slightly. If $w<\Delta$, reorgs can grow unbounded (e.g., $w=30$ and $\Delta=60$ slots Fig.~\ref{fig:window}g), with tips oscillating indefinitely and successful attacks emerging (Fig.~\ref{fig:window-attack}). This confirms the necessity of $w\ge\Delta$ for security, matching the TB requirement.
 
 %ADVERSARY_STAKE = 0.30
 %# Run multiple experiments
