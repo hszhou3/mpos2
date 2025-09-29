@@ -38,7 +38,15 @@ where:
   \item $y(b)$ and $\pi(b)$ are the VRF output and proof, included in the block,
   \item $\sigma(b)$ is a signature on the block contents by the validator $v$.
 \end{itemize}
-The validator must ensure $\txs(b)$ is conflict-free (no double-spends) relative to the ledger state, and $\refs(b)\cup\{\longref(b)\}$ is an antichain in the DAG, to preserve consistency. Honest blocks are immediately gossiped to all nodes. The union of all blocks and reference edges forms a directed acyclic graph (DAG) $G$. We write $u\leadsto v$ if there is a directed path from block $u$ to $v$ in $G$. For a block $b$, let $\Anc(b)=\{a: a\leadsto b\}$ and $\Desc(b)=\{d: b\leadsto d\}$, with $\Anc^*(b)=\Anc(b)\cup\{b\}$, $\Desc^*(b)=\Desc(b)\cup\{b\}$. Two blocks $u$ and $v$ are {\em incomparable} (denoted $u\parallel v$) if neither $u\leadsto v$ nor $v\leadsto u$.
+%The validator must ensure $\txs(b)$ is conflict-free (no double-spends) relative to the ledger state, and $\refs(b)\cup\{\longref(b)\}$ is an antichain in the DAG, to preserve consistency. Honest blocks are immediately gossiped to all nodes. 
+
+The validator must ensure $\txs(b)$ is conflict-free (no double-spends) relative to the ledger state;
+the set of \emph{short references} $\refsin(b)$ forms an antichain in the windowed sub-DAG $G_{s,w}$;\footnote{Note here  $\refsin(b)=\{r\in\refs(b): s-\mathrm{slot}(r)<w\}$ and $G_{s,w}$ is the DAG induced by slots $[s-w+1,s]$.}
+and there is \emph{at most one} optional long reference $\longref(b)$ to a block with $\mathrm{slot}\le s-w$,
+which serves connectivity only and must not create a cycle (long-refs carry zero fork-choice weight).
+
+
+The union of all blocks and reference edges forms a directed acyclic graph (DAG) $G$. We write $u\leadsto v$ if there is a directed path from block $u$ to $v$ in $G$. For a block $b$, let $\Anc(b)=\{a: a\leadsto b\}$ and $\Desc(b)=\{d: b\leadsto d\}$, with $\Anc^*(b)=\Anc(b)\cup\{b\}$, $\Desc^*(b)=\Desc(b)\cup\{b\}$. Two blocks $u$ and $v$ are {\em incomparable} (denoted $u\parallel v$) if neither $u\leadsto v$ nor $v\leadsto u$.
 
 \paragraph{The Execution of Protocol.} The execution of the protocol is an interactive process: in each slot $s$, each honest player collects all messages (with adversarial delay $\le\Delta$), checks eligibility via VRF, possibly creates a block, and broadcasts it. The adversary may inject blocks for corrupted players and deliver or withhold messages. We denote by $\exec_{\Pi,\cA,\cZ}$ the complete execution transcript. Let $\chainset^s$ be the set of all chains (paths from genesis) visible to honest parties at slot $s$, and $\chain_i^s$ be the chain of party $i$ at slot $s$.
 
@@ -523,13 +531,57 @@ yet still preserves liveness as long as $q\lambda_h$ remains bounded away from~$
 \end{itemize}
 
 
+\paragraph{Confirming descendants and weight.}
+We say a block $d$ \emph{confirms} a block $b$ if there is a directed path
+from $b$ to $d$ using only \emph{short references} (i.e., edges that lie
+inside the current window). Long references are connectivity-only and carry
+zero fork-choice weight; they do not contribute to confirmation.
+
+\begin{lemma}[Necessity of TB for block-confirmation liveness]
+\label{lem:TB-necessity}
+If Tip-Boundedness (TB) does not hold, then there exists an admissible
+adversarial schedule under which an honest block $h$ never acquires any
+\emph{confirming} (short-ref) descendants. Consequently, $h$ is never
+confirmed under our fork-choice rule, even though it remains valid and is
+eventually gossiped to all nodes. In particular, without TB, block-confirmation
+liveness (and hence transaction liveness under the standard re-broadcast
+assumption) can fail.
+\end{lemma}
+
+\begin{proof}[Proof sketch]
+Without TB the adversary can keep the tip set size $T_t$ unbounded by releasing
+incomparable blocks that omit $h$ from their short references. Each honest
+proposer can include at most $R$ short references, so the chance that $h$ is
+selected at time $t$ is at most $R/T_t$. By forcing $T_t$ to grow (or to
+re-grow) so that $\sum_t (R/T_t)<\infty$, with positive probability $h$ is
+never short-referenced, hence never confirmed. When $h$ exits the window, it
+may receive long references, but those do not contribute confirmation weight
+by definition; thus $h$ remains unconfirmed. TB enforces a bounded tip set,
+which in turn yields a uniform lower bound on selection probability and
+restores eventual confirmation.
+\end{proof}
+
+\begin{remark}[Validity vs. confirmation]
+A block lacking confirming descendants is still \emph{valid} and will be
+eventually \emph{seen} by all nodes. Our lemma concerns \emph{confirmation}
+under the fork-choice rule (short refs only), not validity. Long references
+ensure connectivity but carry zero weight and thus do not help confirmation.
+At the transaction layer, standard re-broadcast ensures that honest
+transactions reappear in other blocks; TB is still necessary to guarantee
+bounded-delay confirmation of some carrier block.
+\end{remark}
 
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\ignore{%%%%%%%%%%%%%%%%%%%
 \begin{lemma}[Necessity of TB for Ledger Properties]
 DAG Growth, DAG Quality, and DAG Common Past are insufficient to imply persistence
 and liveness of the ledger. In particular, without Tip Boundedness there exist
-adversarial schedules where: (i) some honest blocks never accumulate any confirming
-descendants (breaking liveness, under the no-redundancy assumption), and (ii) two
+adversarial schedules where: 
+(i) some honest blocks never accumulate any short-ref confirming descendants (breaking block-confirmation liveness under our rule; validity and eventual visibility are unaffected), 
+% (i) some honest blocks never accumulate any confirming descendants (breaking liveness, under the no-redundancy assumption), 
+and (ii) two
 branches each accumulate enough honest blocks to satisfy DG, DQ, DCP, yet neither
 dominates, allowing divergent ledgers (breaking safety).
 \end{lemma}
@@ -547,6 +599,10 @@ the other branch (violating liveness, assuming no transaction redundancy), and a
 block confirmed in one branch can later be overturned by the other branch’s growth
 (violating persistence).
 \end{proof}
+}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 
 \paragraph{Remark: TB vs.\ DCP and Relation to Long-Delay Attacks.}
 DAG Common Past (DCP) does \emph{not} imply Tip Boundedness (TB). DCP ensures that if one trims away the most recent $k_D$ layers, then all honest views coincide on the older prefix. However, DCP does not constrain how many incomparable tips may exist within those last $k_D$ layers. In particular, one can have a DAG where the deep past is fully common (DCP holds), yet the active frontier contains $\Theta(\Delta \cdot \text{block rate})$ or even unboundedly many tips. Thus, persistence and liveness may fail even though DG, DQ, and DCP all hold: the honest work is fragmented across too many branches to form a stable margin.

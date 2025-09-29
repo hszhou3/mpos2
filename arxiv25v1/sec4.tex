@@ -107,7 +107,7 @@ Optional: subsample using seed $\rho$ for redundancy reduction.}
 \State $R \gets \GreedyAntichain(G_{s,w})$
 \Comment{Deterministically select large antichain of recent blocks}
 \State $\ell \gets \OptionalLongRef(G, s, w, R, T)$
-\Comment{Optional single long-ref (e.g., last checkpoint)}
+%\Comment{Optional single long-ref (e.g., last checkpoint)}
 \If{$\Conflicts(T, \Anc^*(R\cup\{\ell\}\setminus\{\bot\}))$}
   \State prune a minimal subset of $T$ to remove conflicts, or \Return $\bot$
 \EndIf

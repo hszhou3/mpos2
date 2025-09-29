@@ -20,6 +20,20 @@ Having introduced the DAG properties (DG, DQ, DCP, TB) and their connection to l
   
   \item \textbf{Unbounded referencing:} when eligible, an honest block may reference \emph{any} existing block(s). Honest creators attempt to cite \emph{all} currently visible tips (equivalently, a maximum antichain).%\footnote{Exact vs.\ greedy antichain selection is discussed; both are admissible in \ProjIdeal.}
   \item \textbf{Bounded fork-choice window:} \emph{weight} used in fork choice counts only references created within a fixed \emph{window} of most recent slots (window length $w\ge1$). This prevents long-range withholding from dominating fork choice (\S\ref{subsec:ideal-window-justification}).
+  
+  \noindent\textit{Weightless long references (for connectivity only).}
+Fork-choice weight counts only \emph{short references} within the last $w$ slots.
+We nevertheless permit a (bounded-per-block) long reference to any older block
+(\(\mathrm{slot}\le s-w\)) \emph{with zero fork-choice weight}. Longrefs serve
+\emph{connectivity and sync} only: they stitch withheld or old components back
+into the live frontier, reduce DAG diameter, aid late joiners and data retrieval,
+and provide a natural place to prioritize under-referenced old blocks. Because
+longrefs carry no weight, they cannot reintroduce long-range influence on
+fork choice.
+
+%\noindent\textbf{Validation.} Each block may include up to $R$ short refs (counted in fork choice) and at most one longref to a block with \(\mathrm{slot}\le s-w\); the longref must not create a cycle and carries zero score.
+
+
   \item \textbf{No transaction conflicts:} to focus on consensus dynamics, we idealize away UTXO conflicts; each validator produces at most one block per slot by definition.
 \end{itemize}
 
@@ -84,9 +98,17 @@ For a DAG $G=(V,E)$, $\Tips(G)\triangleq\{v\in V:\text{$v$ has out-degree $0$}\}
 \begin{definition}[Antichain; Maximal vs Maximum]
 $A\subseteq V$ is an antichain if all elements are pairwise incomparable in $G$. Maximal means inclusion-maximal; maximum means largest cardinality.
 \end{definition}
+
+
 \begin{definition}[\GreedyAntichain\ on $G_{s,w}$]
 Fix total order $\prec$ on vertices by $(\slot,\id)$. Scan vertices of $G_{s,w}$ in decreasing $\prec$, adding $v$ if $v$ is incomparable with all current elements; output is a \emph{maximal} antichain. All honest nodes use the same $\prec$; hence determinism.
 \end{definition}
+
+
+
+
+
+
 \begin{definition}[\OptionalLongRef]
 Given current slot $s$ and window $w$, optionally choose a single $\ell\notin G_{s,w}$ for connectivity: prefer the last finalized checkpoint if known; otherwise the $\prec$-max ancestor of $\min_{\prec}R$ with $\slot(\ell)\le s-w$. Long-refs never contribute to weight.
 \end{definition}
@@ -132,7 +154,7 @@ the selected antichain and broadcasts a block carrying a public-coin label $y(b)
 \begin{algorithmic}[1]
 \Require Global DAG $G=(V,E)$
 \Ensure Antichain $A\subseteq V$
-\State $A \gets \ExactMaxAntichain(G)$ \Comment{or use \GreedyAntichain deterministically}
+\State $A \gets \ExactMaxAntichain(G)$ %\Comment{or use \GreedyAntichain deterministically}
 \State \Return $A$
 \end{algorithmic}
 \end{algorithm}
