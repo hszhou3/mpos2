@@ -185,9 +185,9 @@ As $\alpha$ approaches $0.5$, both the frequency and length of reorgs increase (
     xlabel={Mean broadcast delay},
     ylabel={Reorg depth},
     xmin=15, xmax=90,
-    ymin=294, ymax=5156,
-    xtick={15,25,30,35,40,50,55,60,70,80,90},
-    ytick={446,896,1352,1762,2687,3591,5156},
+    ymin=294, ymax=7658,
+    xtick={15,25,30,35,40,50,55,60,65,70,80,90},
+    ytick={446,896,1352,1762,2687,3591,5156,7658},
     legend pos=north west,
     ymajorgrids=true,
     grid style=dashed,
@@ -197,7 +197,7 @@ As $\alpha$ approaches $0.5$, both the frequency and length of reorgs increase (
     color=blue,
     ]
     coordinates {
-    (15,294)(25,356)(30,446)(35,571)(40,896)(50,1352)(55,1762)(60,2687)(70,3591)(80,5156)
+    (15,294)(25,356)(30,446)(35,571)(40,896)(50,1352)(55,1762)(60,2687)(65,2920)(70,3591)(80,5156)(90,7658)
     };
     \addlegendentry{0 succesful attacks}
 \addplot[
@@ -209,6 +209,15 @@ As $\alpha$ approaches $0.5$, both the frequency and length of reorgs increase (
     (60,2687)
     };
     \addlegendentry{3 succesful attacks}
+\addplot[
+    only marks,
+    color=red,
+    mark=diamond,
+    ]
+    coordinates {
+    (65,2920)
+    };
+    \addlegendentry{51 succesful attacks} %0.26%
 \addplot[
     only marks,
     color=red,
@@ -227,6 +236,15 @@ As $\alpha$ approaches $0.5$, both the frequency and length of reorgs increase (
     (80,5156)
     };
     \addlegendentry{282 succesful attacks} %1.43%
+\addplot[
+    only marks,
+    color=red,
+    mark=*,
+    ]
+    coordinates {
+    (90,7658)
+    };
+    \addlegendentry{700 succesful attacks} %3.56%
     
 \end{axis}
 \end{tikzpicture}
