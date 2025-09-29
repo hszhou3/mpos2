@@ -173,7 +173,12 @@ As $\alpha$ approaches $0.5$, both the frequency and length of reorgs increase (
 \subfloat[35 seconds mean broadcast delay]{\includegraphics[width=\textwidth/3]{figs/reorg-C2-f0.25-no_blend-d35s-w30-100k-mr571-sa0.png}}
 \subfloat[40 seconds mean broadcast delay]{\includegraphics[width=\textwidth/3]{figs/reorg-C2-f0.25-no_blend-d40s-w30-100k-mr896-sa0.png}}
 \subfloat[50 seconds mean broadcast delay]{\includegraphics[width=\textwidth/3]{figs/reorg-C2-f0.25-no_blend-d50s-w30-100k-mr1352-sa0.png}}\\
-\subfloat[60 seconds mean broadcast delay]{\includegraphics[width=\textwidth]{figs/reorg-C2-f0.25-no_blend-d60s-w30-100k-mr2687-sa3.png}}
+\subfloat[55 seconds mean broadcast delay]{\includegraphics[width=\textwidth/3]{figs/reorg-C2-f0.25-no_blend-d55s-w30-100k-mr1762-sa0.png}}
+\subfloat[60 seconds mean broadcast delay]{\includegraphics[width=\textwidth/3]{figs/reorg-C2-f0.25-no_blend-d60s-w30-100k-mr2687-sa3.png}}
+\subfloat[65 seconds mean broadcast delay]{\includegraphics[width=\textwidth/3]{figs/reorg-C2-f0.25-no_blend-d65s-w30-100k-mr2920-sa51.png}}\\
+\subfloat[70 seconds mean broadcast delay]{\includegraphics[width=\textwidth/3]{figs/reorg-C2-f0.25-no_blend-d70s-w30-100k-mr3591-sa92.png}}
+\subfloat[80 seconds mean broadcast delay]{\includegraphics[width=\textwidth/3]{figs/reorg-C2-f0.25-no_blend-d80s-w30-100k-mr5156-sa282.png}}
+\subfloat[90 seconds mean broadcast delay]{\includegraphics[width=\textwidth/3]{figs/reorg-C2-f0.25-no_blend-d90s-w30-100k-mr7658-sa700.png}}\\
 \caption{Impact of the mean broadcast delay and the reorg depth of \ProjBase with 30\% adversarial stake, window size 30 slots, and $f=0.25$.}
 \label{fig:window}
 \end{figure}
@@ -248,7 +253,7 @@ As $\alpha$ approaches $0.5$, both the frequency and length of reorgs increase (
     
 \end{axis}
 \end{tikzpicture}
-\caption{Relation between mean broadcast delay on the reorg depth of \ProjBase with 30\% adversarial stake, window size of 30 slots and $f=0.25$.}
+\caption{Relation between mean broadcast delay on the reorg depth of \ProjBase with 30\% adversarial stake, window size of 30 slots and $f=0.25$.hen the mean broadcast delay exceeds the window size, the reorg depth commences to increase exponentially. Successful attacks become probable when the mean broadcast delay approaches double the window size. Consequently, $w \geq \Delta$ ensures that the reorg depth remains low, thereby reducing the likelihood of executing a successful attack. Conversely, $2\Delta < w < \Delta$ results in a higher reorg depth, while $w \leq 2\Delta$ significantly increases the probability of successful attacks.}
 \label{fig:window-attack}
 \end{figure}
 
