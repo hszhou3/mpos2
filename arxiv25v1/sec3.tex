@@ -378,7 +378,7 @@ We now prove that \ProjIdeal satisfies the DAG properties (DG, DQ, DCP, TB) and,
 
 
 \subsubsection{Consensus Properties}
-
+\label{sec:consensus-properties}
 \paragraph{Preliminaries.} %In slot $s$, the number of honest eligible validators is $\mathrm{Hon}_s\sim \mathrm{Binomial}(|\Val|,\,p\cdot \mathbb{E}[\stakefrac{v}\,|\,v\text{ honest}])$, with expectation $\Theta(pH|\Val|)$. 
 Under synchrony and unbounded referencing, all blocks created in slot $s$ can reference \emph{all tips visible at the start of the slot}, and all honest parties receive the same set of blocks by the end of the slot.
 
@@ -418,6 +418,65 @@ Synchrony implies identical views at the end of each slot. By TB, the frontier w
 \label{subsec:ideal-ledger-props}
 We now show that \ProjIdeal's anchored, window-filtered fork choice, coupled with CCA-based conflict resolution, yields ledger safety and liveness.
 
+% ----------------------------------------------------------------
+% Formal probabilistic finality (k-deep / Cardano-style)
+% ----------------------------------------------------------------
+\begin{definition}[Probabilistic finality / $(k,\varepsilon)$-finality]
+\label{def:k-eps-finality}
+Let $\widehat{T}_s$ denote an honest party's \emph{preferred frontier} (preferred set of tips)
+at the end of slot $s$, and let $\depth_{\widehat{T}}(B,s)$ denote the number of successive
+short-reference descendants of block $B$ along $\widehat{T}_s$ (i.e., the usual ``$k$-deep under
+the preferred frontier'' predicate used elsewhere in this paper).  For parameters $k\in\mathbb{N}$
+and $\varepsilon\in(0,1)$, we say that a block $B$ is \emph{$(k,\varepsilon)$-final} at slot $s$
+iff
+\[
+\Pr\!\Big[\exists\,s'\ge s,\ \exists\ \text{honest party }Q:\ B\not\in L^Q_{s'}\Big] \le \varepsilon,
+\]
+and $B$ satisfies $\depth_{\widehat{T}}(B,s)\ge k$.  The probability is taken over the protocol
+randomness and the adversarial scheduling within the stated adversary model.
+
+A protocol satisfies \emph{$(k,\varepsilon)$-finality} if, for every honest party $P$, every slot
+$s$ after GST, and every block $B$ with $\depth_{\widehat{T}}(B,s)\ge k$, the above inequality holds.
+\end{definition}
+
+\begin{remark}[Operational equivalence]
+If the slot duration is $\tau_{\mathrm{slot}}$ then one may report a wall-clock finality time
+$T_{\mathrm{final}} = k\cdot\tau_{\mathrm{slot}}$.  In practice one picks $k$ so that $\varepsilon$
+meets the system's acceptable risk threshold; for example, Cardano-style heuristics map $k$ to a
+few minutes of wall-clock time (see Section~\ref{sec:base}, where we tie $k=\Theta(w)$ to operational choices).%
+\end{remark}
+
+\begin{lemma}[Quantitative finality — dependence on $(w,\Delta,H,\varepsilon)$]
+\label{lem:quant-finality}
+Fix honest stake fraction $H>1/2$, a short-reference window $w$ with $w\ge\Delta$, and a
+target failure probability $\varepsilon\in(0,1)$.  Let $\lambda_h$ denote the expected number
+of honest eligible proposals per slot (so $\lambda_h=\Theta(pH|V|)$ in our model).  There exist
+constants $c_1,c_2>0$ (depending on $p$ and constant factors hidden in DG/DQ concentration)
+such that choosing
+\[
+k \;=\; \Big\lceil c_1\,w \;+\; c_2\log\!\frac{1}{\varepsilon}\Big\rceil
+\]
+yields $(k,\varepsilon)$-finality: any block $B$ that is $k$-deep under an honest preferred
+frontier at time $s$ remains in every honest party's ledger for all later times except with
+probability at most $\varepsilon$.
+\end{lemma}
+
+\begin{proof}[Proof sketch]
+By DG, DQ and TB (Section~\ref{sec:consensus-properties}) every $w$-slot window contains, with overwhelming probability,
+$\Theta(\lambda_h w)$ honest short-references contributing to the fork-choice weight of the honest
+branch, while adversarial contributions within the same window are bounded by $O(\alpha\lambda_h w)$.
+Thus the expected honest margin inside a window grows linearly in $w$ (roughly $\Theta((2H-1)\lambda_h w)$).
+Chernoff-style concentration implies the probability that the adversary accumulates a compensating
+margin decays exponentially in the honest margin.  Consequently, the probability of an adversarial
+reorganization that removes a block buried by depth proportional to $w$ is at most $\exp(-\Theta(w))$,
+and bringing that error below $\varepsilon$ requires only an additive $\Theta(\log(1/\varepsilon))$
+term in $k$.  This yields the stated linear + logarithmic dependence on $(w,\varepsilon)$; the
+dependence on $H$ and $\Delta$ enters via the constants in the DG/DQ/TB concentration bounds.
+\end{proof}
+
+%%%%%%%%%%%%%
+
+
 \begin{theorem}[Persistence (Safety) of \ProjIdeal]
 \label{thm:ideal-safety}
 There exists $k=k(w,\epsilon)$ such that if a block $B$ is $k$-deep under the preferred tip of an honest party at the end of some slot, then with probability $1-\negl(\lambda)$, $B$ remains in the ledger of all honest parties at all future times (no conflicting ledger can supersede it).
@@ -435,5 +494,26 @@ In each slot, with constant probability at least one honest validator is eligibl
 \end{proof}
 
 
+% ---------- notation: adversary stake & proposal rates ----------
+% Honest stake fraction (H) and adversarial stake fraction (alpha).
+% Validator set size: |V|. Per-node per-slot eligibility probability: p.
+% Expected numbers of proposals per slot:
+\[
+  H \in (0,1]\quad\text{: honest stake fraction,}
+\qquad
+  \alpha \in [0,1]\quad\text{: adversarial stake fraction (typically }\alpha\le 1-H\text{).}
+\]
+\[
+  \lambda_h \;:=\; \mathbb{E}[\#\text{ honest eligible proposals per slot}]
+         \;=\; p\cdot H\cdot |V|,
+\qquad
+  \lambda_a \;:=\; \mathbb{E}[\#\text{ adversarial eligible proposals per slot}]
+         \;=\; p\cdot \alpha\cdot |V|.
+\]
+Note the useful relation
+\[
+  \lambda_a \;=\; \frac{\alpha}{H}\,\lambda_h,
+\]
+so one may express adversarial rates either as $\lambda_a$ or in terms of $\alpha$ and $\lambda_h$.
 
 

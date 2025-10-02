@@ -230,6 +230,27 @@ Two conflicting transactions on different branches trigger the above resolution.
 \paragraph{Finalization heuristic.}
 $P$ may \emph{finalize} a block $B$ once it is $k$-deep under $\hat T_s$, with $k=\Theta(w)$ as derived in Theorem~\ref{thm:base-safety}. (Finalization is monotone and checkpoint-compatible.)
 
+
+% ----------------------------------------------------------------
+\begin{remark}[Practical finality and choice of $k$]
+\label{rem:practical-finality}
+The formal $(k,\varepsilon)$-finality notion (Def.~\ref{def:k-eps-finality}) maps to an operational
+finality time $T_{\mathrm{final}} = k\cdot\tau_{\mathrm{slot}}$ in implementations.  The security
+analysis of the practical protocol shows that one may choose $k=\Theta(w)$ to obtain exponentially
+small reorg probability (Theorem~4.9 establishes persistence with $k=\Theta(w)$ under the model
+assumptions).  Hence, in practice one sets the short-reference window $w$ (subject to $w\ge\Delta$)
+and then picks $k$ proportional to $w$, adding a small $\Theta(\log(1/\varepsilon))$ term to
+meet an explicit $\varepsilon$ target.
+
+As an operational example, if $\tau_{\mathrm{slot}}=20\,$s and the designer targets $T_{\mathrm{final}}\approx 5\,$min,
+then $k\approx 15$ (i.e., burying by 15 short-reference descendants).  Different slot durations and
+risk-tolerances produce different $k$; the lemma in Section~\ref{sec:ideal} (Lemma~\ref{lem:quant-finality}) gives the
+quantitative dependence on $(w,\Delta,H,\varepsilon)$ used to pick $k$ for a desired $\varepsilon$.
+\end{remark}
+
+
+
+
 \subsection{Security of the Practical Protocol}
 \label{subsec:base-security}
 We prove the DAG properties and ledger properties for \ProjBase under~\eqref{eq:base-params}. We write $\lambda_h \triangleq \mathbb{E}[\#\text{honest eligible per slot}]=\Theta(pH|\Val|)$.
@@ -275,6 +296,8 @@ Let $k=\Theta(w)$ be chosen so that in $w$ slots the honest branch accumulates a
 \begin{proof}[Proof sketch]
 Consider a conflicting head $j$ and honest head $i$ with $c=\CCA(i,j)$. By DG, DQ, and TB, during any $w$-slot window after $c$ the honest branch contributes $\Omega(\lambda_h w)$ window-filtered references; the adversary contributes $O(\alpha |\Val| p w)$ \emph{only} to blocks \emph{actually created} within the window (withheld older references carry zero weight). Since $H>\tfrac{1}{2}{+}\varepsilon$, the honest margin in the window is positive with high probability and grows with $w$. After $k=\Theta(w)$ depth, any tie can no longer be reached by adversarial scheduling; anchored fork-choice and CCA resolution keep selecting the honest branch, preserving $B$.
 \end{proof}
+
+
 
 \begin{theorem}[Liveness of \ProjBase]
 \label{thm:base-liveness}

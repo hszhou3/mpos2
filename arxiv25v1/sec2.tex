@@ -7,6 +7,57 @@
 \section{Preliminaries} 
 \label{sec:prelim}
 
+% --- THIS PART IS NEW: notation at-a-glance ---
+\begin{table}[htp!]
+\vspace{-.3cm}
+\vspace{-.3cm}
+
+\centering
+\small
+\begin{tabular}{ll}\toprule
+Symbol & Meaning \\\midrule
+$H$ & honest fraction of stake; adversary fraction $\alpha=1-H$ \\
+$\Delta$ & post-GST network delay bound (in slots) \\
+$w$ & fork-choice window size (short-reference horizon) \\
+$k$ & persistence depth (no reorgs beyond $k$ after finality) \\
+$f$ & production parallelism factor (Sec.~\ref{sec:eval}) \\
+$\Tips(G)$ & set of current tips in DAG $G$; $\Anc^*(\cdot)$ transitive ancestors \\
+$\CCA(i,j)$ & closest common ancestor of blocks $i,j$ (Sec.~\ref{sec:base}) \\
+$\contrib(d)$ & per-block contribution weight (default $1$; optionally stake-weighted) \\\bottomrule
+\end{tabular}
+\caption{Notation summary used throughout the paper.}
+\label{tab:notation}
+\end{table}
+
+% -----------------------------
+% Notation: stake & proposal rates
+% -----------------------------
+\paragraph{Stake, eligibility and rates.}
+Let $|V|$ be the number of validators (or stake units) and let $p\in(0,1]$ denote the per-validator
+per-slot eligibility probability. Denote by
+\[
+  H\in(0,1]\qquad\text{(honest stake fraction)},
+\]
+\[
+  \alpha\in[0,1]\qquad\text{(adversarial stake fraction, typically }\alpha\le 1-H\text{)}.
+\]
+We define the expected numbers of proposals per slot
+\[
+  \lambda_h \;:=\; \mathbb{E}[\#\text{ honest proposals per slot}] \;=\; p\cdot H\cdot |V|,
+\]  
+\[
+  \lambda_a \;:=\; \mathbb{E}[\#\text{ adversarial proposals per slot}] \;=\; p\cdot \alpha\cdot |V|.
+\]
+When convenient we sometimes express adversarial load as $\lambda_a=(\alpha/H)\,\lambda_h$.
+\smallskip
+
+\paragraph{Asymptotic notation.}
+We write $\Theta(\cdot)$ in the standard asymptotic sense: $f(n)=\Theta(g(n))$ means $f$ and $g$
+agree up to constant factors.  In particular, $\Theta(pH|V|)$ denotes a quantity proportional to
+$pH|V|$ (within multiplicative constants).   
+%We write $\Theta(pH)$ to denote an \emph{expression proportional to} $pH$ (for instance a per-validator rate), and the surrounding context should indicate whether we mean that per-validator quantity or the aggregate rate 
+
+
 
 \subsection{Security Model and Protocol Basics}
 \label{sec:model}
