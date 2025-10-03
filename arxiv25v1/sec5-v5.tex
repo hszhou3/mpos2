@@ -110,19 +110,19 @@ Empirically, higher parallelism (larger $f$) correlates with shorter reorgs, esp
 %We assess how attacker capability (stake fraction and network control) affects the distribution of reorg depths and times. We vary $\alpha$ from $0.10$ to $0.49$ and test $\Delta$ from $0.2$ s to $2$ s, holding other parameters fixed. For each setting, we simulate long runs (up to $10^6$ slots) to obtain distributions of reorg length and finalization time.
 
 \begin{figure}[htbp!]
-\subfloat[\ProjBase, $\alpha=30\%$]{\includegraphics[width=\textwidth/4]{figs/adv-30.png}}
-\subfloat[Praos, $\alpha=30\%$]{\includegraphics[height=21mm, keepaspectratio]{figs/reorg-praos-f0.05-as30-d2-1M-OK}}
-\subfloat[\ProjBase, $\alpha=40\%$]{\includegraphics[width=\textwidth/4]{figs/adv-40.png}}
-\subfloat[Praos, $\alpha=40\%$]{\includegraphics[height=21mm, keepaspectratio]{figs/reorg-praos-f0.05-as40-d2-1M-OK}}\\
-\subfloat[\ProjBase, $\alpha=45\%$]{\includegraphics[width=\textwidth/4]{figs/adv-45.png}}
-\subfloat[Praos, $\alpha=45\%$]{\includegraphics[height=21mm, keepaspectratio]{figs/reorg-praos-f0.05-as45-d2-1M-OK}}
-\subfloat[\ProjBase, $\alpha=49\%$]{\includegraphics[width=\textwidth/4]{figs/adv-49.png}}
-\subfloat[Praos $\alpha=49\%$]{\includegraphics[height=21mm, keepaspectratio]{figs/reorg-praos-f0.05-as49-d2-1M-OK}}\\
-\subfloat[\ProjBase 51\% of adversarial stake]{\includegraphics[width=\textwidth/4]{figs/adv-51.png}}
-\subfloat[Praos with 51\% of adversarial stake]{\includegraphics[height=21mm, keepaspectratio]{figs/reorg-praos-f0.05-as51-d2-1M-OK}}
-\subfloat[\ProjBase 60\% of adversarial stake]{\includegraphics[width=\textwidth/4]{figs/adv-60.png}}
-\subfloat[Praos with 60\% of adversarial stake]{\includegraphics[height=21mm, keepaspectratio]{figs/reorg-praos-f0.05-as60-d2-1M-OK}}\\
-\caption{Impact of the adversarial stake on the reorg depth for \ProjBase with $f=0.25$, and Praos with $f=0.05$.}
+\subfloat[\ProjBase, $\alpha=0.30$]{\includegraphics[width=\textwidth/4]{figs/adv-30.png}}
+\subfloat[Praos, $\alpha=0.30$]{\includegraphics[height=21mm, keepaspectratio]{figs/reorg-praos-f0.05-as30-d2-1M-OK}}
+\subfloat[\ProjBase, $\alpha=0.40$]{\includegraphics[width=\textwidth/4]{figs/adv-40.png}}
+\subfloat[Praos, $\alpha=0.40$]{\includegraphics[height=21mm, keepaspectratio]{figs/reorg-praos-f0.05-as40-d2-1M-OK}}\\
+\subfloat[\ProjBase, $\alpha=0.45$]{\includegraphics[width=\textwidth/4]{figs/adv-45.png}}
+\subfloat[Praos, $\alpha=0.45$]{\includegraphics[height=21mm, keepaspectratio]{figs/reorg-praos-f0.05-as45-d2-1M-OK}}
+\subfloat[\ProjBase, $\alpha=0.49$]{\includegraphics[width=\textwidth/4]{figs/adv-49.png}}
+\subfloat[Praos, $\alpha=0.49$]{\includegraphics[height=21mm, keepaspectratio]{figs/reorg-praos-f0.05-as49-d2-1M-OK}}\\
+\subfloat[\ProjBase $\alpha=0.51$]{\includegraphics[width=\textwidth/4]{figs/adv-51.png}}
+\subfloat[Praos, $\alpha=0.51$]{\includegraphics[height=21mm, keepaspectratio]{figs/reorg-praos-f0.05-as51-d2-1M-OK}}
+\subfloat[\ProjBase, $\alpha=0.60$]{\includegraphics[width=\textwidth/4]{figs/adv-60.png}}
+\subfloat[Praos, $\alpha=0.60$]{\includegraphics[height=21mm, keepaspectratio]{figs/reorg-praos-f0.05-as60-d2-1M-OK}}\\
+\caption{Comparison of the impact of the adversarial stake on the reorg depth for \ProjBase ($f=0.25$) and Praos ($f=0.05$).}
 \label{fig:adversarial}
 \end{figure}
 
