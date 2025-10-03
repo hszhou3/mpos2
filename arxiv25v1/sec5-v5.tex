@@ -129,14 +129,14 @@ Empirically, higher parallelism (larger $f$) correlates with shorter reorgs, esp
 \paragraph{Adversarial stake.}
 As $\alpha$ approaches $0.5$, both the frequency and length of reorgs increase (Fig.~\ref{fig:adversarial}). Even at $\alpha=0.45$, reorg lengths remain bounded (e.g., $\le 10$ slots with $>99\%$ probability) under $w=30$. The tail grows sharply as $\alpha\to 0.5$, reflecting loss of safety at majority. At $\alpha=0.49$, we observe occasional reorgs of depth $15$--$20$ (rare). For $\alpha<0.5$, typical reorgs stay shallow (depth $\le 3$), while extremes depend on the relationship between $\Delta$ and $w$.
 
-\begin{figure}[htbp!]
-\subfloat[10 seconds block time, $f=0.1$]{\includegraphics[width=\textwidth/2]{figs/reorg-OP-10s-no_blend-2M-OK.png}}
-\subfloat[20 seconds block time, $f=0.05$]{\includegraphics[width=\textwidth/2]{figs/reorg-OP-20s-no_blend-2M-OK.png}}\\
-\subfloat[33 seconds block time, $f=0.03$]{\includegraphics[width=\textwidth/2]{figs/reorg-OP-33s-no_blend-2M-OK.png}}
-\subfloat[40 seconds block time, $f=0.025$]{\includegraphics[width=\textwidth/2]{figs/reorg-OP-40s-no_blend-2M-OK.png}}
-\caption{Impact of network delay on the reorg depth for Ouroboros Praos and \ProjBase (no parallelization, no window) with 30\% adversarial stake.}
-\label{fig:delay}
-\end{figure}
+%\begin{figure}[htbp!]
+%\subfloat[10 seconds block time, $f=0.1$]{\includegraphics[width=\textwidth/2]{figs/reorg-OP-10s-no_blend-2M-OK.png}}
+%\subfloat[20 seconds block time, $f=0.05$]{\includegraphics[width=\textwidth/2]{figs/reorg-OP-20s-no_blend-2M-OK.png}}\\
+%\subfloat[33 seconds block time, $f=0.03$]{\includegraphics[width=\textwidth/2]{figs/reorg-OP-33s-no_blend-2M-OK.png}}
+%\subfloat[40 seconds block time, $f=0.025$]{\includegraphics[width=\textwidth/2]{figs/reorg-OP-40s-no_blend-2M-OK.png}}
+%\caption{Impact of network delay on the reorg depth for Ouroboros Praos and \ProjBase (no parallelization, no window) with 30\% adversarial stake.}
+%\label{fig:delay}
+%\end{figure}
 
 \begin{figure}[htbp!]
 \subfloat[$f=0.05$ and $\Delta=2$s]{\includegraphics[width=\textwidth/4]{figs/reorg-C2-f0.05-no_blend-d2s-w30-100k-mr1069-sa0.png}}
@@ -322,7 +322,7 @@ As $\alpha$ approaches $0.5$, both the frequency and length of reorgs increase (
 \end{figure}
 
 \paragraph{Network delay.}
-Holding $\alpha=0.3$, increasing $\Delta$ relative to slot time induces more transient forks (Fig.~\ref{fig:delay} and Fig.~\ref{fig:c2-delay}) but, if $w\ge\Delta$, they resolve within $w$ slots and the reorg-depth distribution shifts only slightly. If $w<\Delta$, reorgs can grow unbounded (e.g., $w=30$ and $\Delta=60$ slots Fig.~\ref{fig:window}g), with tips oscillating indefinitely and successful attacks emerging (Fig.~\ref{fig:window-attack}). This confirms the necessity of $w\ge\Delta$ for security, matching the TB requirement.
+Holding $\alpha=0.3$, increasing $\Delta$ relative to slot time induces more transient forks (Fig.~\ref{fig:c2-delay}) but, if $w\ge\Delta$, they resolve within $w$ slots and the reorg-depth distribution shifts only slightly. If $w<\Delta$, reorgs can grow unbounded (e.g., $w=30$ and $\Delta=60$ slots Fig.~\ref{fig:window}g), with tips oscillating indefinitely and successful attacks emerging (Fig.~\ref{fig:window-attack}). This confirms the necessity of $w\ge\Delta$ for security, matching the TB requirement.
 
 %ADVERSARY_STAKE = 0.30
 %# Run multiple experiments
