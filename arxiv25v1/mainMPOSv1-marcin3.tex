@@ -1061,7 +1061,7 @@ Let $\Inputs(x)$ be the set of consumed UTXOs of transaction $x$. A set $T$ is c
 (ii) $\Inputs(T)$ is disjoint from $\Inputs(\txs(\Anc^*(H)))$, and (iii) each $x\in T$ passes $\Valid(S,x)$, where $S$ is the state induced by $\Anc^*(H)$. Define $\Conflicts(T,H)$ to be true if $T$ is \emph{not} conflict-free w.r.t.\ $H$.
 \end{definition}
 \begin{definition}[Contribution Function $\contrib$]
-Let $\theta\in\{\mathsf{equal},\mathsf{stake}\}$ be a protocol parameter. Define $\contrib(d)=1$ if $\theta=\mathsf{equal}$ and $\contrib(d)=\stakefrac{\val(d)}$ if $\theta=\mathsf{stake}$.\mnote{This could be assumed "equal" for the \ProjIdeal.}
+Let $\theta\in\{\mathsf{equal},\mathsf{stake}\}$ be a protocol parameter. Define $\contrib(d)=1$ if $\theta=\mathsf{equal}$ and $\contrib(d)=\stakefrac{\val(d)}$ if $\theta=\mathsf{stake}$.\mnote{This could be assumed "equal" for the \ProjIdeal.}\hnote{thanks! Addressed}
 \end{definition}
 \begin{definition}[\ForkChoiceUpdate]
 Maintain a cache comprising $\Tips(G)$, a per-validator latest-block map $L:\Val\to V\cup\{\bot\}$, and window reachability summaries sufficient to evaluate antichain tests and window-weight sums.
@@ -1117,7 +1117,7 @@ In \ProjIdeal, when a validator $v$ is eligible at slot $s$, it samples transact
 \State Insert $b$ into $G$: add vertex and edges $(r\to b)$ for $r\in\refs(b)$ \mnote{the same for longref?}
 \State Update $\Tips(G)$ and reachability summaries
 \State \ForkChoiceUpdate($G$) \Comment{Update fork-choice state}
-\State \Broadcast($b$) \mnote{I don't think that we need to rebroadcast $b$ here.}
+\State \Broadcast($b$) \mnote{I don't think that we need to rebroadcast $b$ here.}\hnote{Addressed}
 \end{algorithmic}
 \end{algorithm}
 
@@ -1132,7 +1132,7 @@ We use a CCA-anchored, window-filtered weight metric. Fix a window parameter $w\
 \begin{equation*}
 W(T)\;=\;\sum_{\substack{d\in\Desc^*(T)\\a\leadsto d}} \wref(d;w).
 \end{equation*}
-We select the tip $\hat{T}$ with maximum score (breaking ties by the deterministic order $\prec$):\mnote{tip or set of tips of non-conflicting branches?}
+We select the tip $\hat{T}$ with maximum score (breaking ties by the deterministic order $\prec$):\mnote{tip or set of tips of non-conflicting branches?}\hnote{Addressed}
 
 \begin{algorithm}[H]
 \caption{Anchored Fork Choice (Idealized)}
@@ -1140,7 +1140,7 @@ We select the tip $\hat{T}$ with maximum score (breaking ties by the determinist
 \begin{algorithmic}[1]
 \Require Anchor $a\in V$, candidate tips $\mathcal{T}\subseteq \Tips(G)$, window $w$
 \Ensure Selected tip $\hat{T}$
-\State $\hat{T}\gets \bot, \hat{W}\gets -\infty$\mnote{Weight cannot be negative so maybe "0" instead of negative infinity?}
+\State $\hat{T}\gets \bot, \hat{W}\gets -\infty$\mnote{Weight cannot be negative so maybe "0" instead of negative infinity?}\hnote{Thanks. Already revised and fixed}
 \ForAll{$T \in \mathcal{T}$}
   \State $W(T)\gets\sum_{\substack{d\in\Desc^*(T)\\a\leadsto d}} \wref(d;w)$
   \If{$W(T)>\hat{W}$ \textbf{or} ($W(T)=\hat{W}$ and $T\prec \hat{T}$)}
