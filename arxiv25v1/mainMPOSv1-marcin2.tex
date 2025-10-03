@@ -334,7 +334,7 @@ In any window of $\ell$ slots after GST, honest work makes \emph{linear progress
   % Arrow up
   \draw[->] (60,0.6) -- (60,1.3);
   \node[above] at (60,1.3) {\scriptsize DG: $\ge \tau_D\ell$ honest on a preferred branch (w.h.p.)};
-\end{tikzpicture}\mnote{Moved the $s$ and $s+\ell$ a bit down.}
+\end{tikzpicture}\mnote{Moved the $s$ and $s+\ell$ a bit down.}\hnote{Fixed}
 \caption{\textbf{DAG Growth (DG).}
 \small
 Over any $\ell$-slot interval after GST, with probability $1-\negl(\lambda)$ at least $\tau_D\ell$ honest blocks become ancestors of \emph{an honest party’s fork-choice tip} (i.e., lie on some honest preferred branch).
@@ -405,7 +405,7 @@ We say $\mathrm{DQ}[\mu_D,\ell]$ holds if
 
   % Callout
   \node[align=center] at (60,0.9) {\scriptsize DQ: fraction of honest among frontier entrants $\ge \mu_D$ w.h.p.};
-\end{tikzpicture}\mnote{Moved the $s$ and $s+\ell$ a bit down.}
+\end{tikzpicture}\mnote{Moved the $s$ and $s+\ell$ a bit down.}\hnote{Fixed}
 \caption{\textbf{DAG Quality (DQ).}
 \small
 In any $\ell$-slot window after GST, the fraction of \emph{honest blocks} among those entering the advancing frontier is at least $\mu_D$ with probability $1-\negl(\lambda)$.
@@ -428,7 +428,7 @@ For any two honest views of the DAG at times $t_1\le t_2$, if we remove the last
 Fix $k_D \in \mathbb{N}$. For an honest party $P$ at slot $t$, let $V_t^P$ denote
 its view of the DAG at the end of $t$, and define
 $\mathsf{Trim}(V_t^P,k_D)$ as $V_t^P$ with the last $k_D$ layers (by slots)
-beneath its fork-choice tip removed. \mnote{For example, couldn't we instead of $V_t^P$ use $\chain_i^s$?}
+beneath its fork-choice tip removed. \mnote{For example, couldn't we instead of $V_t^P$ use $\chain_i^s$?}\hnote{addressed}
 
 We say $\mathrm{DCP}[k_D]$ holds if for all honest parties $P,Q$ and all slots
 $t_1 \le t_2$ after $\mathrm{GST}$,
@@ -543,14 +543,15 @@ The green region shows the $k$-deep finalized prefix at $t_1$, which remains unc
 \begin{definition}[Persistence (Safety)]
 Fix $k \in \mathbb{N}$. For an honest party $P$ and slot $t$, let $L_t^P$ denote
 the ledger (totally ordered list of transactions) induced by applying the fork-choice
-rule to $V_t^P$.\mnote{Same here, couldn't we instead of $V_t^P$ use $\chain_i^s$?} We say $\mathrm{Persistence}[k]$ holds if for all pairs of honest
+rule to $V_t^P$.\mnote{Same here, couldn't we instead of $V_t^P$ use $\chain_i^s$?}\hnote{addressed} 
+We say $\mathrm{Persistence}[k]$ holds if for all pairs of honest
 parties $P,Q$ and all slots $t_1 \le t_2$ after $\mathrm{GST}$,
 \[
 \Pr\!\Big[\, L_{t_1}^P[1..n-k] \;=\; L_{t_2}^Q[1..n-k] \,\Big] \;\ge\; 1-\negl(\lambda),
 \]
 where $n=|L_{t_1}^P|$. That is, all but the last $k$ transactions in $P$'s ledger
 at time $t_1$ are immutable and appear in $Q$'s ledger at time $t_2$.
-\end{definition} \mnote{Nit: This definition is using transactions for the $k$ parameter, however, it looks to me that it should also work if we use blocks instead. Do we need to use transactions in this context as the number of transactions can be a function of the number of blocks? IMHO, I think that it would be more natural to express the persistence as number of blocks rather than the number of transactions.}
+\end{definition} \mnote{Nit: This definition is using transactions for the $k$ parameter, however, it looks to me that it should also work if we use blocks instead. Do we need to use transactions in this context as the number of transactions can be a function of the number of blocks? IMHO, I think that it would be more natural to express the persistence as number of blocks rather than the number of transactions.}\hnote{I used GKL15 style here}
 
 \begin{remark}[On DAG Growth and Persistence]
 The proof of persistence later in Sections~3.4.2 and~4.3.2 relies on DG
@@ -605,7 +606,7 @@ Red marks the transaction broadcast event at slot $s$ and the inclusion window $
 \begin{definition}[Liveness]
 Fix $\ell_{\mathrm{live}} \in \mathbb{N}$. For any valid transaction $\tx$ that is
 broadcast by an honest party $P$ in every slot after $\mathrm{GST}$, let
-$E_t^Q(\tx)$ denote the event that honest party $Q$'s ledger $L_t^Q$ \mnote{Similarly here, couldn't we instead of $L_t^Q$ use $\chain_i^s$?} at the end of slot $t$
+$E_t^Q(\tx)$ denote the event that honest party $Q$'s ledger $L_t^Q$ \mnote{Similarly here, couldn't we instead of $L_t^Q$ use $\chain_i^s$?}\hnote{addressed} at the end of slot $t$
 contains $\tx$. We say $\mathrm{Liveness}[\ell_{\mathrm{live}}]$ holds if for all honest parties $P,Q$
 and for all slots $s \ge \mathrm{GST}$,
 \[
@@ -620,7 +621,7 @@ except with negligible probability.
 Liveness requires that valid transactions eventually appear in all honest ledgers.
 The revised DG property, formulated with respect to preferred branches,
 ensures that honest block production makes linear progress in those branches.
-Coupled with TB (to prevent tips from fragmenting indefinitely) \mnote{TB is introduced in the next section so maybe "Coupled with tip boundedness (defined below, to prevent tips from fragmenting indefinitely)..."}
+Coupled with TB (to prevent tips from fragmenting indefinitely) \mnote{TB is introduced in the next section so maybe "Coupled with tip boundedness (defined below, to prevent tips from fragmenting indefinitely)..."}\hnote{addressed}
 and DQ (to ensure honest dominance), this guarantees that transactions
 broadcast after GST will be absorbed and confirmed within bounded time.
 \end{remark}
