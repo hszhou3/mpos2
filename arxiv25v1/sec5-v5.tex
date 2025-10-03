@@ -139,73 +139,87 @@ As $\alpha$ approaches $0.5$, both the frequency and length of reorgs increase (
 \end{figure}
 
 \begin{figure}[htbp!]
-\subfloat[$f=0.05$ and $\Delta=2$s]{\includegraphics[width=\textwidth/3]{figs/reorg-C2-f0.05-no_blend-d2s-w30-100k-mr1069-sa0.png}}
-\subfloat[$f=0.1$ and $\Delta=2$s]{\includegraphics[width=\textwidth/3]{figs/reorg-C2-f0.1-no_blend-d2s-w30-100k-mr998-sa0}}
-\subfloat[$f=0.2$ and $\Delta=2$s]{\includegraphics[width=\textwidth/3]{figs/reorg-C2-f0.2-no_blend-d2s-w30-100k-mr377-sa0}}\\
-\subfloat[$f=0.05$ and $\Delta=5$s]{\includegraphics[width=\textwidth/3]{figs/reorg-C2-f0.05-no_blend-d5s-w30-100k-mr1145-sa0.png}}
-\subfloat[$f=0.1$ and $\Delta=5$s]{\includegraphics[width=\textwidth/3]{figs/reorg-C2-f0.1-no_blend-d5s-w30-100k-mr860-sa0}}
-\subfloat[$f=0.2$ and $\Delta=5$s]{\includegraphics[width=\textwidth/3]{figs/reorg-C2-f0.2-no_blend-d5s-w30-100k-mr324-sa0}}\\
-\subfloat[$f=0.05$ and $\Delta=8$s]{\includegraphics[width=\textwidth/3]{figs/reorg-C2-f0.05-no_blend-d8s-w30-100k-mr1379-sa0.png}}
-\subfloat[$f=0.1$ and $\Delta=8$s]{\includegraphics[width=\textwidth/3]{figs/reorg-C2-f0.1-no_blend-d8s-w30-100k-mr937-sa0}}
-\subfloat[$f=0.2$ and $\Delta=8$s]{\includegraphics[width=\textwidth/3]{figs/reorg-C2-f0.2-no_blend-d8s-w30-100k-mr411-sa0}}\\
-\subfloat[$f=0.05$ and $\Delta=10$s]{\includegraphics[width=\textwidth/3]{figs/reorg-C2-f0.05-no_blend-d10s-w30-100k-mr1282-sa0.png}}
-\subfloat[$f=0.1$ and $\Delta=10$s]{\includegraphics[width=\textwidth/3]{figs/reorg-C2-f0.1-no_blend-d10s-w30-100k-mr1001-sa0}}
-\subfloat[$f=0.2$ and $\Delta=10$s]{\includegraphics[width=\textwidth/3]{figs/reorg-C2-f0.2-no_blend-d10s-w30-100k-mr329-sa0}}\\
-\subfloat[$f=0.05$ and $\Delta=12$s]{\includegraphics[width=\textwidth/3]{figs/reorg-C2-f0.05-no_blend-d12s-w30-100k-mr1436-sa0.png}}
-\subfloat[$f=0.1$ and $\Delta=12$s]{\includegraphics[width=\textwidth/3]{figs/reorg-C2-f0.1-no_blend-d12s-w30-100k-mr1056-sa0}}
-\subfloat[$f=0.2$ and $\Delta=12$s]{\includegraphics[width=\textwidth/3]{figs/reorg-C2-f0.2-no_blend-d12s-w30-100k-mr378-sa0}}\\
-\subfloat[$f=0.05$ and $\Delta=15$s]{\includegraphics[width=\textwidth/3]{figs/reorg-C2-f0.05-no_blend-d15s-w30-100k-mr1912-sa0.png}}
-\subfloat[$f=0.1$ and $\Delta=15$s]{\includegraphics[width=\textwidth/3]{figs/reorg-C2-f0.1-no_blend-d15s-w30-100k-mr1222-sa0}}
-\subfloat[$f=0.2$ and $\Delta=15$s]{\includegraphics[width=\textwidth/3]{figs/reorg-C2-f0.2-no_blend-d15s-w30-100k-mr383-sa0}}\\
-\caption{Impact of block production rate and mean broadcast delay on the reorg depth for \ProjBase with 30s window and 30\% adversarial stake.\mnote{This could be moved to appendix as I'm extracting info from here in the Fig.~\ref{fig:delay-plot}.}}
+\subfloat[$f=0.05$ and $\Delta=2$s]{\includegraphics[width=\textwidth/4]{figs/reorg-C2-f0.05-no_blend-d2s-w30-100k-mr1069-sa0.png}}
+\subfloat[$f=0.1$ and $\Delta=2$s]{\includegraphics[width=\textwidth/4]{figs/reorg-C2-f0.1-no_blend-d2s-w30-100k-mr998-sa0}}
+\subfloat[$f=0.2$ and $\Delta=2$s]{\includegraphics[width=\textwidth/4]{figs/reorg-C2-f0.2-no_blend-d2s-w30-100k-mr377-sa0}}
+\subfloat[Praos and $\Delta=2$s]{\includegraphics[height=21mm, keepaspectratio]{figs/reorg-praos-f0.05-as30-d2-1M-OK}}\\
+\subfloat[$f=0.05$ and $\Delta=5$s]{\includegraphics[width=\textwidth/4]{figs/reorg-C2-f0.05-no_blend-d5s-w30-100k-mr1145-sa0.png}}
+\subfloat[$f=0.1$ and $\Delta=5$s]{\includegraphics[width=\textwidth/4]{figs/reorg-C2-f0.1-no_blend-d5s-w30-100k-mr860-sa0}}
+\subfloat[$f=0.2$ and $\Delta=5$s]{\includegraphics[width=\textwidth/4]{figs/reorg-C2-f0.2-no_blend-d5s-w30-100k-mr324-sa0}}
+\subfloat[Praos and $\Delta=5$s]{\includegraphics[height=21mm, keepaspectratio]{figs/reorg-praos-f0.05-as30-d5-1M-OK}}\\
+\subfloat[$f=0.05$ and $\Delta=8$s]{\includegraphics[width=\textwidth/4]{figs/reorg-C2-f0.05-no_blend-d8s-w30-100k-mr1379-sa0.png}}
+\subfloat[$f=0.1$ and $\Delta=8$s]{\includegraphics[width=\textwidth/4]{figs/reorg-C2-f0.1-no_blend-d8s-w30-100k-mr937-sa0}}
+\subfloat[$f=0.2$ and $\Delta=8$s]{\includegraphics[width=\textwidth/4]{figs/reorg-C2-f0.2-no_blend-d8s-w30-100k-mr411-sa0}}
+\subfloat[Praos and $\Delta=8$s]{\includegraphics[height=21mm, keepaspectratio]{figs/reorg-praos-f0.05-as30-d8-1M-OK}}\\
+\subfloat[$f=0.05$ and $\Delta=10$s]{\includegraphics[width=\textwidth/4]{figs/reorg-C2-f0.05-no_blend-d10s-w30-100k-mr1282-sa0.png}}
+\subfloat[$f=0.1$ and $\Delta=10$s]{\includegraphics[width=\textwidth/4]{figs/reorg-C2-f0.1-no_blend-d10s-w30-100k-mr1001-sa0}}
+\subfloat[$f=0.2$ and $\Delta=10$s]{\includegraphics[width=\textwidth/4]{figs/reorg-C2-f0.2-no_blend-d10s-w30-100k-mr329-sa0}}
+\subfloat[Praos and $\Delta=10$s]{\includegraphics[height=21mm, keepaspectratio]{figs/reorg-praos-f0.05-as30-d10-1M-OK}}\\
+\subfloat[$f=0.05$ and $\Delta=12$s]{\includegraphics[width=\textwidth/4]{figs/reorg-C2-f0.05-no_blend-d12s-w30-100k-mr1436-sa0.png}}
+\subfloat[$f=0.1$ and $\Delta=12$s]{\includegraphics[width=\textwidth/4]{figs/reorg-C2-f0.1-no_blend-d12s-w30-100k-mr1056-sa0}}
+\subfloat[$f=0.2$ and $\Delta=12$s]{\includegraphics[width=\textwidth/4]{figs/reorg-C2-f0.2-no_blend-d12s-w30-100k-mr378-sa0}}
+\subfloat[Praos and $\Delta=12$s]{\includegraphics[height=21mm, keepaspectratio]{figs/reorg-praos-f0.05-as30-d12-1M-OK}}\\
+\subfloat[$f=0.05$ and $\Delta=15$s]{\includegraphics[width=\textwidth/4]{figs/reorg-C2-f0.05-no_blend-d15s-w30-100k-mr1912-sa0.png}}
+\subfloat[$f=0.1$ and $\Delta=15$s]{\includegraphics[width=\textwidth/4]{figs/reorg-C2-f0.1-no_blend-d15s-w30-100k-mr1222-sa0}}
+\subfloat[$f=0.2$ and $\Delta=15$s]{\includegraphics[width=\textwidth/4]{figs/reorg-C2-f0.2-no_blend-d15s-w30-100k-mr383-sa0}}
+\subfloat[Praos and $\Delta=15$s]{\includegraphics[height=21mm, keepaspectratio]{figs/reorg-praos-f0.05-as30-d15-1M-OK}}\\
+\caption{Comparison of the impact of block production rate and mean broadcast delay on the reorg depth for \ProjBase with 30s window and 30\% adversarial stake to Praos. As the mean broadcast delay increases, the reorg depth also increases. Conversely, when the block production rate increases, the amplitude of the reorg depth increase diminishes. In essence, with higher block production, the reorg depth becomes less responsive to the delay. Praos consistently emphasizes a shorter reorg depth, albeit at the significant expense of a substantially higher reorg probability.}
 \label{fig:c2-delay}
 \end{figure}
 
-\begin{figure}[htbp!]
-\begin{tikzpicture}
-\begin{axis}[
-    %title={Impact of window size on the reorg depth of \ProjBase with 30\% adversarial stake and $f=0.25$},
-    xlabel={Mean broadcast delay},
-    ylabel={Reorg depth},
-    xmin=2, xmax=20,
-    ymin=294, ymax=3500,
-    xtick={1,5,8,10,12,15,20},
-    ytick={500,1000,1500,2000,2500,3000,3500},
-    legend pos=north west,
-    ymajorgrids=true,
-    grid style=dashed,
-]
-
-\addplot[
-    color=blue,
-    mark=triangle,
-    ]
-    coordinates {
-    (2,1069)(5,1145)(8,1379)(10,1282)(12,1436)(15,1912)(20,3323)(30,5000)
-    };
-    \addlegendentry{$f=0.05$}
-\addplot[
-    color=green,
-    mark=o,
-    ]
-    coordinates {
-    (2,998)(5,860)(8,937)(10,1001)(12,1056)(15,1222)(20,1340)(30,2000)
-    };
-    \addlegendentry{$f=0.1$}
-\addplot[
-    color=red,
-    mark=square,
-    ]
-    coordinates {
-    (2,377)(5,324)(8,411)(10,329)(12,378)(15,383)(20,443)(30,1000)
-    };
-    \addlegendentry{$f=0.2$}
-    
-\end{axis}
-\end{tikzpicture}
-\caption{Relation between mean block production rate and broadcast delay on the reorg depth of \ProjBase with 30\% adversarial stake, and window size of 30 slots. When the mean broadcast delay increases, the reorg depth also increases. However, when the block production rate increases, the amplitude of reorg depth increase becomes smaller. In other words, with higher block production, the reorg depth becomes less sensitive to the delay.}
-\label{fig:delay-plot}
-\end{figure}
+%\begin{figure}[htbp!]
+%\begin{tikzpicture}
+%\begin{axis}[
+%    %title={Impact of window size on the reorg depth of \ProjBase with 30\% adversarial stake and $f=0.25$},
+%    xlabel={Mean broadcast delay},
+%    ylabel={Max reorg depth},
+%    xmin=2, xmax=20,
+%    ymin=0, ymax=3500,
+%    xtick={2,5,8,10,12,15,20},
+%    ytick={0,500,1000,1500,2000,2500,3000,3500},
+%    legend pos=north west,
+%    ymajorgrids=true,
+%    grid style=dashed,
+%]
+%
+%\addplot[
+%    color=blue,
+%    mark=triangle,
+%    ]
+%    coordinates {
+%    (2,1069)(5,1145)(8,1379)(10,1282)(12,1436)(15,1912)(20,3323)
+%    };
+%    \addlegendentry{$f=0.05$}
+%\addplot[
+%    color=green,
+%    mark=o,
+%    ]
+%    coordinates {
+%    (2,998)(5,860)(8,937)(10,1001)(12,1056)(15,1222)(20,1340)
+%    };
+%    \addlegendentry{$f=0.1$}
+%\addplot[
+%    color=red,
+%    mark=+,
+%    ]
+%    coordinates {
+%    (2,377)(5,324)(8,411)(10,329)(12,378)(15,383)(20,443)
+%    };
+%    \addlegendentry{$f=0.2$}
+%\addplot[
+%    color=black,
+%    mark=square,
+%    ]
+%    coordinates {
+%    (2,43)(5,61)(8,56)(10,81)(12,81)(15,82)(20,135)
+%    };
+%    \addlegendentry{Praos}
+%    
+%\end{axis}
+%\end{tikzpicture}
+%\caption{Relation between mean block production rate and broadcast delay on the reorg depth of \ProjBase with 30\% adversarial stake, and window size of 30 slots. When the mean broadcast delay increases, the reorg depth also increases. However, when the block production rate increases, the amplitude of reorg depth increase becomes smaller. In other words, with higher block production, the reorg depth becomes less sensitive to the delay.\mnote{This does not include the probability of the reorg, which is higher for Praos.}}
+%\label{fig:delay-plot}
+%\end{figure}
 
 
 %\begin{figure}[htbp!]
@@ -308,7 +322,7 @@ As $\alpha$ approaches $0.5$, both the frequency and length of reorgs increase (
 \end{figure}
 
 \paragraph{Network delay.}
-Holding $\alpha=0.3$, increasing $\Delta$ relative to slot time induces more transient forks (Fig.~\ref{fig:delay}, Fig.~\ref{fig:c2-delay}, and Fig.~\ref{fig:delay-plot}) but, if $w\ge\Delta$, they resolve within $w$ slots and the reorg-depth distribution shifts only slightly. If $w<\Delta$, reorgs can grow unbounded (e.g., $w=30$ and $\Delta=60$ slots Fig.~\ref{fig:window}g), with tips oscillating indefinitely and successful attacks emerging (Fig.~\ref{fig:window-attack}). This confirms the necessity of $w\ge\Delta$ for security, matching the TB requirement.
+Holding $\alpha=0.3$, increasing $\Delta$ relative to slot time induces more transient forks (Fig.~\ref{fig:delay} and Fig.~\ref{fig:c2-delay}) but, if $w\ge\Delta$, they resolve within $w$ slots and the reorg-depth distribution shifts only slightly. If $w<\Delta$, reorgs can grow unbounded (e.g., $w=30$ and $\Delta=60$ slots Fig.~\ref{fig:window}g), with tips oscillating indefinitely and successful attacks emerging (Fig.~\ref{fig:window-attack}). This confirms the necessity of $w\ge\Delta$ for security, matching the TB requirement.
 
 %ADVERSARY_STAKE = 0.30
 %# Run multiple experiments
