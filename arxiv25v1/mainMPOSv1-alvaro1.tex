@@ -159,7 +159,9 @@
 \begin{document}
 
 \title{
-Cryptareon: Scalable and Resilient Multi-Proposer Consensus\footnote{We refer interested readers to Álvaro Castro-Castilla’s ``New Cryptarchia,'' available at \url{https://www.notion.so/nomos-tech/New-Cryptarchia-202261aa09df8026b31ad5e09c1a3fbb}.}
+Cryptareon: Scalable and Resilient Multi-Proposer Consensus\footnote{We refer interested readers to Álvaro Castro-Castilla’s ``New Cryptarchia,'' available at \url{https://www.notion.so/nomos-tech/New-Cryptarchia-202261aa09df8026b31ad5e09c1a3fbb}.
+\anote{This was just a draft and very preliminary, so we should remove it.}\hnote{addressed}
+}
 \\
 {\small {\sc Work in progress; Early draft}}
 }
@@ -204,7 +206,10 @@ The evolution of blockchain consensus protocols has been shaped by an ongoing te
 Moreover, the single-leader design makes chain-based systems vulnerable to network asynchrony and adversarial behavior. Adverse network conditions or message delays can break the common prefix, enabling chain reorganizations and double-spend attacks. Similarly, if a malicious or slow proposer controls a slot, it can censor or delay transactions, undermining liveness and fairness.
 
 \subsection{Efficiency Bottlenecks in Chain-Based Consensus Protocols}
-Chain-based consensus protocols, including Bitcoin~\cite{Bitcoin} and PoS variants like Ouroboros Praos~\cite{EC:DGKR18}, employ sequential block production: in each round or slot, a designated leader proposes a new block to extend the chain. This design simplifies certain proofs of safety, but introduces a fundamental scalability–security trade-off. The throughput must be throttled to ensure blocks propagate fully before the next one, or else forks become likely. If blocks are generated too quickly relative to network delay, honest nodes may see different chains, violating common-prefix, and undermining the security and liveness guarantees. Thus, to maintain safety, these protocols deliberately limit their block rate, resulting in higher latency and lower capacity.
+Chain-based consensus protocols, including Bitcoin~\cite{Bitcoin} and PoS variants like Ouroboros Praos~\cite{EC:DGKR18}, employ sequential block production: in each round or slot, a designated leader proposes a new block to extend the chain. \anote{We don’t have rounds, I think this terminology is borrowed from pBFT and it may be confusing.
+But more importantly, at every slot there might be 1, several or no proposers!}
+\hnote{addressed}
+This design simplifies certain proofs of safety, but introduces a fundamental scalability–security trade-off. The throughput must be throttled to ensure blocks propagate fully before the next one, or else forks become likely. If blocks are generated too quickly relative to network delay, honest nodes may see different chains, violating common-prefix, and undermining the security and liveness guarantees. Thus, to maintain safety, these protocols deliberately limit their block rate, resulting in higher latency and lower capacity.
 
 Furthermore, when network conditions deteriorate (large delays or partitions), even these limited-throughput protocols can fail to maintain consistency. Single-proposer systems are particularly fragile: any disruption in message delivery can cause honest nodes to fall out of sync, allowing adversaries to execute chain reorganizations or double-spend attacks. In summary, traditional chain protocols face a bottleneck: increasing throughput or asynchrony directly threatens security, forcing a cautious pace.
 
